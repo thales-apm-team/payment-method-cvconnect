@@ -10,21 +10,19 @@ import java.util.List;
 public class CVCoCancelRequest extends CVCoRequest {
     private transient String id;
     private String reason;
-    private String label;
 
 
     public CVCoCancelRequest(ResetRequest request) {
         this.id = request.getPartnerTransactionId();
         this.reason = "OTHER";
-//        this.label = "";
+    }
+
+    public String getId() {
+        return this.id;
     }
 
     public String getReason() {
         return reason;
-    }
-
-    public String getLabel() {
-        return label;
     }
 
     @Override
@@ -36,7 +34,5 @@ public class CVCoCancelRequest extends CVCoRequest {
         return PluginUtils.getSealHeader(configuration, sealFields);
     }
 
-    public String getId() {
-        return this.id;
-    }
+
 }

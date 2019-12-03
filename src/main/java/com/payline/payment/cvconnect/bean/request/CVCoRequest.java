@@ -12,7 +12,7 @@ public abstract class CVCoRequest {
     private String requestDate;
 
 
-    public CVCoRequest() {
+    CVCoRequest() {
         this.requestDate = ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT );
     }
 

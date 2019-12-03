@@ -16,7 +16,6 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
     private Order order;
     private PaymentMethod paymentMethod;
     private RedirectUrls redirectUrls;
-    private ApplicationContext applicationContext;
 
 
     public CVCoCreateTransactionRequest(ContractParametersCheckRequest request) {
@@ -30,7 +29,6 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
 
         this.paymentMethod = new PaymentMethod("001", "NORMAL", null);
         this.redirectUrls = new RedirectUrls("anUrl", "anUrl");
-        this.applicationContext = new ApplicationContext();
     }
 
 
@@ -59,8 +57,6 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
                 request.getEnvironment().getRedirectionReturnURL()
                 , request.getEnvironment().getRedirectionCancelURL()
         );
-        this.applicationContext = new ApplicationContext();
-
     }
 
     public Merchant getMerchant() {
@@ -80,10 +76,6 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
         return redirectUrls;
     }
 
-    public ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
-
     @Override
     public String getANCVSecurity(RequestConfiguration configuration) {
         List<String> sealFields = new ArrayList<>();
@@ -94,5 +86,4 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
         sealFields.add(this.order.getAmount().getTotal());
         return PluginUtils.getSealHeader(configuration, sealFields);
     }
-
 }

@@ -36,7 +36,6 @@ class BeanTest {
 
         CVCoCreateTransactionRequest request = new CVCoCreateTransactionRequest(paymentRequest);
         Assertions.assertNotNull(request.getMerchant());
-        Assertions.assertNotNull(request.getApplicationContext());
         Assertions.assertNotNull(request.getOrder());
         Assertions.assertNotNull(request.getPaymentMethod());
         Assertions.assertNotNull(request.getRedirectUrls());
@@ -55,7 +54,6 @@ class BeanTest {
 
         CVCoCreateTransactionRequest request = new CVCoCreateTransactionRequest(contractRequest);
         Assertions.assertNotNull(request.getMerchant());
-        Assertions.assertNotNull(request.getApplicationContext());
         Assertions.assertNotNull(request.getOrder());
         Assertions.assertNotNull(request.getPaymentMethod());
         Assertions.assertNotNull(request.getRedirectUrls());

@@ -35,7 +35,6 @@ public class CVCoPaymentResponse extends CVCoResponse {
 
                 // final states
             case Transaction.State.CANCELLED:
-                // todo c'est un succes de remboursement?
             case Transaction.State.PAID:
                 response = PaymentResponseSuccess.PaymentResponseSuccessBuilder
                         .aPaymentResponseSuccess()
@@ -106,7 +105,6 @@ public class CVCoPaymentResponse extends CVCoResponse {
 
             // final states
             case Transaction.State.CANCELLED:
-                // todo on fait quoi de l'annulation??
             case Transaction.State.PAID:
                 paylineStatus = SuccessTransactionStatus.builder().build();
                 break;
