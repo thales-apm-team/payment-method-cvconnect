@@ -50,7 +50,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             if (!Transaction.State.INITIALIZED.equalsIgnoreCase(state)) {
                 String errorMessage = "Invalid transaction State";
-                LOGGER.error(errorMessage);
+                LOGGER.info(errorMessage);
                 return PaymentResponseFailure.PaymentResponseFailureBuilder
                         .aPaymentResponseFailure()
                         .withPartnerTransactionId(partnerTransactionId)
