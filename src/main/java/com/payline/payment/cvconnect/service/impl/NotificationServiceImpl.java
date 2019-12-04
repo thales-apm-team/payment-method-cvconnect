@@ -3,7 +3,6 @@ package com.payline.payment.cvconnect.service.impl;
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
 import com.payline.payment.cvconnect.bean.request.CVCoGetTransactionStatusRequest;
 import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
-import com.payline.payment.cvconnect.exception.InvalidDataException;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.PluginUtils;
 import com.payline.payment.cvconnect.utils.http.HttpClient;

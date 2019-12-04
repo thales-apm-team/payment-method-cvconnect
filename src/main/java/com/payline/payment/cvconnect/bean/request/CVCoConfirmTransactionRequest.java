@@ -1,5 +1,6 @@
 package com.payline.payment.cvconnect.bean.request;
 
+import com.google.gson.annotations.Expose;
 import com.payline.payment.cvconnect.bean.common.CVAmount;
 import com.payline.payment.cvconnect.bean.common.Payer;
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
@@ -12,6 +13,7 @@ import java.util.List;
 
 public class CVCoConfirmTransactionRequest extends CVCoRequest {
     private Payer payer;
+    @Expose(serialize = false, deserialize = false)
     private transient String id;
 
     public CVCoConfirmTransactionRequest(PaymentRequest request, String id) {

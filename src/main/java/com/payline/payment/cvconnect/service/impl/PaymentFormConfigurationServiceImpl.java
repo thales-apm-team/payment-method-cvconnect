@@ -25,10 +25,10 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
     private static final String CVCO_ID_PLACEHOLDER = "payment.form.config.id.placeholder";
     private static final String CVCO_ID_VALIDATION_ERROR = "payment.form.config.validation.error";
 
-    private static final String emailPattern = "([a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\@[a-zA-Z0-9_]+\\.[a-zA-Z]{2,4})";
-    private static final String phonePattern = "(\\d+)";
-    private static final String fullPattern = "^(" + phonePattern + "|" + emailPattern + ")$";
-    private static final Pattern pattern = Pattern.compile(fullPattern);
+    private static final String EMAIL_PATTERN = "([a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\@[a-zA-Z0-9_]+\\.[a-zA-Z]{2,4})";
+    private static final String PHONE_PATTERN = "(\\d+)";
+    private static final String FULL_PATTERN = "^(" + PHONE_PATTERN + "|" + EMAIL_PATTERN + ")$";
+    private static final Pattern PATTERN = Pattern.compile(FULL_PATTERN);
 
     private I18nService i18n = I18nService.getInstance();
 
@@ -45,7 +45,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                 .withKey(Constants.PaymentFormKeys.CVCO_ID_KEY)
                 .withLabel(CVCO_ID_LABEL)
                 .withInputType(InputType.TEXT)
-                .withValidation(pattern)
+                .withValidation(PATTERN)
                 .withValidationErrorMessage(CVCO_ID_VALIDATION_ERROR)
                 .withPlaceholder(CVCO_ID_PLACEHOLDER)
                 .build();

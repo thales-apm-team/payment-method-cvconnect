@@ -4,7 +4,6 @@ package com.payline.payment.cvconnect.bean.request;
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
 import com.payline.payment.cvconnect.utils.PluginUtils;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

@@ -43,6 +43,10 @@ public class Transaction {
     }
 
     public static class State{
+
+        private State() {
+        }
+
         public static final String INITIALIZED = "INITIALIZED";
         public static final String PROCESSING = "PROCESSING";
         public static final String AUTHORIZED = "AUTHORIZED";
