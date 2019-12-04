@@ -77,13 +77,13 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
     }
 
     @Override
-    public String getANCVSecurity(RequestConfiguration configuration) {
+    public List<String> getANCVSecurity() {
         List<String> sealFields = new ArrayList<>();
         sealFields.add(this.merchant.getShopId());
         sealFields.add(this.merchant.getServiceProviderId());
         sealFields.add(this.order.getId());
         sealFields.add(this.order.getPaymentId());
         sealFields.add(this.order.getAmount().getTotal());
-        return PluginUtils.getSealHeader(configuration, sealFields);
+        return sealFields;
     }
 }

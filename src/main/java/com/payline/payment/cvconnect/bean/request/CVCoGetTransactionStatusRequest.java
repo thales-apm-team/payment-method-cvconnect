@@ -19,8 +19,7 @@ public class CVCoGetTransactionStatusRequest extends CVCoRequest {
     }
 
     @Override
-    public String getANCVSecurity(RequestConfiguration configuration) {
-        List<String> sealFields = Collections.singletonList(this.id);
-        return PluginUtils.getSealHeader(configuration, sealFields);
+    public List<String> getANCVSecurity() {
+        return Collections.singletonList(this.id);
     }
 }

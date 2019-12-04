@@ -14,7 +14,7 @@ import java.util.List;
 public class CVCoConfirmTransactionRequest extends CVCoRequest {
     private Payer payer;
     @Expose(serialize = false, deserialize = false)
-    private transient String id;
+    private String id;
 
     public CVCoConfirmTransactionRequest(PaymentRequest request, String id) {
         CVAmount amount = new CVAmount(
@@ -39,12 +39,12 @@ public class CVCoConfirmTransactionRequest extends CVCoRequest {
     }
 
     @Override
-    public String getANCVSecurity(RequestConfiguration configuration) {
+    public List<String> getANCVSecurity() {
         List<String> sealFields = new ArrayList<>();
         sealFields.add(this.id);
         sealFields.add(this.payer.getBeneficiaryId());
         sealFields.add(this.payer.getAmount().getTotal());
 
-        return PluginUtils.getSealHeader(configuration, sealFields);
+        return sealFields;
     }
 }

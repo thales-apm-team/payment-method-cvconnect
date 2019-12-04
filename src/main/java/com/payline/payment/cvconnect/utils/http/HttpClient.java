@@ -7,6 +7,7 @@ import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
 import com.payline.payment.cvconnect.exception.InvalidDataException;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.Constants;
+import com.payline.payment.cvconnect.utils.PluginUtils;
 import com.payline.payment.cvconnect.utils.properties.ConfigProperties;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.logger.LogManager;
@@ -117,7 +118,7 @@ public class HttpClient {
     private Header[] createHeaders(RequestConfiguration configuration, CVCoRequest request) {
         Header[] headers = new Header[2];
         headers[0] = new BasicHeader(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE);
-        headers[1] = new BasicHeader(ANCV_SECURITY, request.getANCVSecurity(configuration));
+        headers[1] = new BasicHeader(ANCV_SECURITY, PluginUtils.getSealHeader(configuration, request.getANCVSecurity()));
         return headers;
     }
 

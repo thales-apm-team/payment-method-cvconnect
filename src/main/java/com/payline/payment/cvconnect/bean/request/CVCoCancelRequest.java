@@ -10,7 +10,7 @@ import java.util.List;
 
 public class CVCoCancelRequest extends CVCoRequest {
     @Expose(serialize = false, deserialize = false)
-    private transient String id;
+    private String id;
     private String reason;
 
 
@@ -28,13 +28,12 @@ public class CVCoCancelRequest extends CVCoRequest {
     }
 
     @Override
-    public String getANCVSecurity(RequestConfiguration configuration) {
+    public List<String> getANCVSecurity() {
         List<String> sealFields = new ArrayList<>();
         sealFields.add(this.id);
         sealFields.add(this.reason);
 
-        return PluginUtils.getSealHeader(configuration, sealFields);
+        return sealFields;
     }
-
 
 }
