@@ -8,6 +8,7 @@ import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.BuyerPaymentId;
 import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.impl.EmptyTransactionDetails;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
+import com.payline.pmapi.bean.payment.response.impl.PaymentResponseOnHold;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 
 public class CVCoPaymentResponse extends CVCoResponse {
@@ -25,13 +26,18 @@ public class CVCoPaymentResponse extends CVCoResponse {
         switch (this.transaction.getState()) {
             case Transaction.State.INITIALIZED:
 
-                //break;
             // non final states
-            // todo faire ces cas... Voir Q17
             case Transaction.State.PROCESSING:
             case Transaction.State.AUTHORIZED:
             case Transaction.State.VALIDATED:
             case Transaction.State.CONSIGNED:
+                response = PaymentResponseOnHold.PaymentResponseOnHoldBuilder
+                        .aPaymentResponseOnHold()
+                        .withOnHoldCause(OnHoldCause.ASYNC_RETRY)
+                        .withStatusCode(this.transaction.getFullState())
+                        .withPartnerTransactionId(this.transaction.getId())
+                        .build();
+                break;
 
                 // final states
             case Transaction.State.CANCELLED:

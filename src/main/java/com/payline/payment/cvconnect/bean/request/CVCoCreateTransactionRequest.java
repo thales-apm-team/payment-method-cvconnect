@@ -49,7 +49,7 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
         );
 
         this.paymentMethod = new PaymentMethod(
-                "001" // todo voir Q7
+                "001"
                 , request.isCaptureNow() ? "NORMAL" : "DEFERRED"
                 , request.isCaptureNow() ? null : request.getDifferedActionDate()
         );
