@@ -13,6 +13,7 @@ import com.payline.pmapi.bean.configuration.request.ContractParametersCheckReque
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
+import com.payline.pmapi.bean.payment.response.impl.PaymentResponseOnHold;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
 import org.junit.jupiter.api.Assertions;
@@ -149,11 +150,11 @@ class BeanTest {
 
     private static Stream<Arguments> statusSet2() {
         return Stream.of(
-                Arguments.of(Transaction.State.INITIALIZED, PaymentResponseSuccess.class, null),
-                Arguments.of(Transaction.State.PROCESSING, PaymentResponseSuccess.class, null),
-                Arguments.of(Transaction.State.AUTHORIZED, PaymentResponseSuccess.class, null),
-                Arguments.of(Transaction.State.VALIDATED, PaymentResponseSuccess.class, null),
-                Arguments.of(Transaction.State.CONSIGNED, PaymentResponseSuccess.class, null),
+                Arguments.of(Transaction.State.INITIALIZED, PaymentResponseOnHold.class, null),
+                Arguments.of(Transaction.State.PROCESSING, PaymentResponseOnHold.class, null),
+                Arguments.of(Transaction.State.AUTHORIZED, PaymentResponseOnHold.class, null),
+                Arguments.of(Transaction.State.VALIDATED, PaymentResponseOnHold.class, null),
+                Arguments.of(Transaction.State.CONSIGNED, PaymentResponseOnHold.class, null),
 
                 Arguments.of(Transaction.State.CANCELLED, PaymentResponseSuccess.class, null),
                 Arguments.of(Transaction.State.PAID, PaymentResponseSuccess.class, null),
