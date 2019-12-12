@@ -1,0 +1,140 @@
+import javax.swing.*
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "http://192.168.4.78:8081/repository/maven-releases"
+    }
+}
+
+publishing {
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec"
+        property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
+        property 'sonar.dependencyCheck.htmlReportPath', "${project.buildDir}/reports/dependency-check-report.html"
+    }
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url "http://192.168.4.78:8081/repository/maven-releases"
+        }
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.1'
+    }
+}
+
+tasks.compileJava.dependsOn("generateMetaInf")
+tasks.compileJava.dependsOn("generateGitIgnore")
+
+task generateMetaInf {
+
+    doLast {
+        File srcDir = file("${projectDir}/src/main/resources/META-INF/services")
+        mkdir srcDir;
+        project.delete(files(srcDir.listFiles()));
+
+        FileTree tree = fileTree('src/main').include('**/service/impl/*')
+        if (tree.isEmpty()) {
+            tree = fileTree('src/main').include('**/service/*')
+        }
+
+        String _package = "";
+        tree.each { File file ->
+            Map<String, String> imports = new HashMap<>();
+            def _classname = "";
+            file.eachLine { line ->
+                // check if the line contains your data
+
+                if (line.contains('package')) {
+                    _package = line.trim().split()[1].replace(';', '.');
+                }
+
+                if (line.contains('import') && line.contains('com.payline.pmapi.service')) {
+                    def _import = line.trim().split()[1].replace(';', '');
+                    String[] wrds = _import.split("\\.");
+                    def key = wrds[wrds.length - 1];
+                    imports.put(key, _import)
+
+                }
+
+                if (line.contains('class') && line.contains('implements')) {
+                    _classname = file.getName().replace(".java", "");
+                    String implementedClasses = line.trim().split("implements")[1];
+                    implementedClasses.replace(",", " ").trim();
+                    String[] implementedClasse = implementedClasses.split();
+                    for (int i = 0; i < implementedClasse.length; i++) {
+                        if (imports.containsKey(implementedClasse[i])) {
+                            def metafile = new File(srcDir.getPath() + '/' + imports.get(implementedClasse[i]));
+                            metafile.write(_package + _classname);
+                        }
+                    }
+
+                }
+
+            }
+            def configMetafile = new File(srcDir.getPath() + '/com.payline.pmapi.service.PaymentFormConfigurationService')
+            configMetafile.write(_package + 'PaymentFormConfigurationServiceImpl');
+
+        }
+    }
+}
+
+
+task generateGitIgnore {
+    def externalFileName = "$projectDir/.gitignore"
+    File file = new File(externalFileName);
+    if (!file.exists()) {
+        def ignore = new File("$projectDir/.gitignore");
+        ignore.write(".gradle/\nout/\nbuild/\n.idea/\n.external\n");
+    } else {
+        Boolean toWrite = true;
+
+        file.eachLine { line ->
+            // check if the line contains your data
+
+            if (line.contains('.external')) {
+                toWrite = false;
+
+            }
+
+        }
+
+        if (toWrite) {
+
+            ignore.write(".external\n");
+        }
+    }
+}
+
+
+tasks.build.dependsOn("checkJarSize")
+task checkJarSize {
+    doLast {
+
+        File file = new File("${projectDir}/build/libs/${jar.archiveName}")
+        System.out.println(file.getName())
+        System.out.println(file.length())
+        if (file.length() > 2097152) {
+            JOptionPane.showMessageDialog(null, "Jar file size is too heavy : " + file.length(),
+                    "Titre : exception",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
