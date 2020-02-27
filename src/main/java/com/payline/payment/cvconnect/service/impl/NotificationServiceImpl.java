@@ -1,8 +1,8 @@
 package com.payline.payment.cvconnect.service.impl;
 
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
-import com.payline.payment.cvconnect.bean.request.CVCoGetTransactionStatusRequest;
-import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
+import com.payline.payment.cvconnect.bean.request.GetTransactionStatusRequest;
+import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.PluginUtils;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
@@ -29,13 +29,13 @@ public class NotificationServiceImpl implements NotificationService {
         try {
             // init data
             String content = PluginUtils.inputStreamToString(request.getContent());
-            CVCoPaymentResponse cvcoNotificationResponse = CVCoPaymentResponse.fromJson(content);
+            PaymentResponse cvcoNotificationResponse = PaymentResponse.fromJson(content);
             partnerTransactionId = cvcoNotificationResponse.getTransaction().getId();
             RequestConfiguration configuration = new RequestConfiguration(request.getContractConfiguration(), request.getEnvironment(), request.getPartnerConfiguration());
 
             // get final status
-            CVCoGetTransactionStatusRequest cvCoGetTransactionStatusRequest = new CVCoGetTransactionStatusRequest(partnerTransactionId);
-            return getTransactionStateChangedResponseFromNotificationRequest(transactionId, partnerTransactionId, configuration, cvCoGetTransactionStatusRequest);
+            GetTransactionStatusRequest getTransactionStatusRequest = new GetTransactionStatusRequest(partnerTransactionId);
+            return getTransactionStateChangedResponseFromNotificationRequest(transactionId, partnerTransactionId, configuration, getTransactionStatusRequest);
 
         } catch (PluginException e) {
             TransactionStatus failureStatus = FailureTransactionStatus.builder()
@@ -79,8 +79,8 @@ public class NotificationServiceImpl implements NotificationService {
      * @param request
      * @return
      */
-    private TransactionStateChangedResponse getTransactionStateChangedResponseFromNotificationRequest(String transactionId, String partnerTransactionId, RequestConfiguration configuration, CVCoGetTransactionStatusRequest request) {
-        CVCoPaymentResponse response = client.getTransactionStatus(configuration, request);
+    private TransactionStateChangedResponse getTransactionStateChangedResponseFromNotificationRequest(String transactionId, String partnerTransactionId, RequestConfiguration configuration, GetTransactionStatusRequest request) {
+        PaymentResponse response = client.getTransactionStatus(configuration, request);
         // check response object
         if (!response.isOk()) {
             TransactionStatus failureStatus = FailureTransactionStatus.builder()

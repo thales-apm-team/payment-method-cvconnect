@@ -4,9 +4,9 @@ public class Order {
     private String id;
     private String paymentId;
     private String label;
-    private CVAmount amount;
+    private Amount amount;
 
-    public Order(String id, String paymentId, String label, CVAmount amount) {
+    public Order(String id, String paymentId, String label, Amount amount) {
         this.id = id;
         this.paymentId = paymentId;
         this.label = label;
@@ -25,7 +25,7 @@ public class Order {
         return label;
     }
 
-    public CVAmount getAmount() {
+    public Amount getAmount() {
         return amount;
     }
 }

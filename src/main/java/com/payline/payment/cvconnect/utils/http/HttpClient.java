@@ -3,7 +3,7 @@ package com.payline.payment.cvconnect.utils.http;
 
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
 import com.payline.payment.cvconnect.bean.request.*;
-import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
+import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.InvalidDataException;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.Constants;
@@ -115,7 +115,7 @@ public class HttpClient {
         return sb.toString();
     }
 
-    private Header[] createHeaders(RequestConfiguration configuration, CVCoRequest request) {
+    private Header[] createHeaders(RequestConfiguration configuration, Request request) {
         Header[] headers = new Header[2];
         headers[0] = new BasicHeader(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE);
         headers[1] = new BasicHeader(ANCV_SECURITY, PluginUtils.getSealHeader(configuration, request.getANCVSecurity()));
@@ -206,7 +206,7 @@ public class HttpClient {
 
 
     // create transaction POST request
-    public CVCoPaymentResponse createTransaction(RequestConfiguration requestConfiguration, CVCoCreateTransactionRequest request) {
+    public PaymentResponse createTransaction(RequestConfiguration requestConfiguration, CreateTransactionRequest request) {
 
         // create all data needed to do the call
         String body = request.toString();
@@ -216,12 +216,12 @@ public class HttpClient {
 
         // do the http call
         StringResponse response = post(url, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
-        return CVCoPaymentResponse.fromJson(response.getContent());
+        return PaymentResponse.fromJson(response.getContent());
     }
 
 
     // confirm transaction POST request
-    public CVCoPaymentResponse confirmTransaction(RequestConfiguration requestConfiguration, CVCoConfirmTransactionRequest request) {
+    public PaymentResponse confirmTransaction(RequestConfiguration requestConfiguration, ConfirmTransactionRequest request) {
 
         // create all data needed to do the call
         String body = request.toString();
@@ -231,11 +231,11 @@ public class HttpClient {
 
         // do the http call
         StringResponse response = post(url, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
-        return CVCoPaymentResponse.fromJson(response.getContent());
+        return PaymentResponse.fromJson(response.getContent());
     }
 
     // cancel transaction
-    public CVCoPaymentResponse cancelTransaction(RequestConfiguration requestConfiguration, CVCoCancelRequest request) {
+    public PaymentResponse cancelTransaction(RequestConfiguration requestConfiguration, CancelRequest request) {
         // create all data needed to do the call
         String body = request.toString();
         String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.URL);
@@ -244,18 +244,18 @@ public class HttpClient {
 
         // do the http call
         StringResponse response = post(url, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
-        return CVCoPaymentResponse.fromJson(response.getContent());
+        return PaymentResponse.fromJson(response.getContent());
     }
 
     // get transaction status GET request
-    public CVCoPaymentResponse getTransactionStatus(RequestConfiguration requestConfiguration, CVCoGetTransactionStatusRequest request) {
+    public PaymentResponse getTransactionStatus(RequestConfiguration requestConfiguration, GetTransactionStatusRequest request) {
         // create all data needed to do the call
         String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.URL);
-        String path = createPath(BASE_PATH, request.getId(), CANCELLATION_PATH);
+        String path = createPath(BASE_PATH, request.getId());
         Header[] headers = createHeaders(requestConfiguration, request);
 
         // do the http call
         StringResponse response = get(url, path, headers);
-        return CVCoPaymentResponse.fromJson(response.getContent());
+        return PaymentResponse.fromJson(response.getContent());
     }
 }

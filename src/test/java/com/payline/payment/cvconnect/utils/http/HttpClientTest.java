@@ -2,20 +2,18 @@ package com.payline.payment.cvconnect.utils.http;
 
 import com.payline.payment.cvconnect.MockUtils;
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
-import com.payline.payment.cvconnect.bean.request.CVCoCancelRequest;
-import com.payline.payment.cvconnect.bean.request.CVCoConfirmTransactionRequest;
-import com.payline.payment.cvconnect.bean.request.CVCoCreateTransactionRequest;
-import com.payline.payment.cvconnect.bean.request.CVCoGetTransactionStatusRequest;
-import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
+import com.payline.payment.cvconnect.bean.request.CancelRequest;
+import com.payline.payment.cvconnect.bean.request.ConfirmTransactionRequest;
+import com.payline.payment.cvconnect.bean.request.CreateTransactionRequest;
+import com.payline.payment.cvconnect.bean.request.GetTransactionStatusRequest;
+import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.PluginException;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +50,7 @@ class HttpClientTest {
                 , MockUtils.anEnvironment()
                 , MockUtils.aPartnerConfiguration()
         );
-        CVCoCreateTransactionRequest request = new CVCoCreateTransactionRequest(MockUtils.aPaylinePaymentRequest());
+        CreateTransactionRequest request = new CreateTransactionRequest(MockUtils.aPaylinePaymentRequest());
 
         // create Mock
         StringResponse stringResponse = MockUtils.mockStringResponse(
@@ -64,7 +62,7 @@ class HttpClientTest {
 
 
         // test method
-        CVCoPaymentResponse response = client.createTransaction(configuration, request);
+        PaymentResponse response = client.createTransaction(configuration, request);
 
         // assertions
         Assertions.assertNotNull(response);
@@ -79,7 +77,7 @@ class HttpClientTest {
                 , MockUtils.anEnvironment()
                 , MockUtils.aPartnerConfiguration()
         );
-        CVCoConfirmTransactionRequest request = new CVCoConfirmTransactionRequest(MockUtils.aPaylinePaymentRequest(), "1");
+        ConfirmTransactionRequest request = new ConfirmTransactionRequest(MockUtils.aPaylinePaymentRequest(), "1");
 
         // create Mock
         StringResponse stringResponse = MockUtils.mockStringResponse(
@@ -91,7 +89,7 @@ class HttpClientTest {
 
 
         // test method
-        CVCoPaymentResponse response = client.confirmTransaction(configuration, request);
+        PaymentResponse response = client.confirmTransaction(configuration, request);
 
         // assertions
         Assertions.assertNotNull(response);
@@ -106,7 +104,7 @@ class HttpClientTest {
                 , MockUtils.anEnvironment()
                 , MockUtils.aPartnerConfiguration()
         );
-        CVCoCancelRequest request = new CVCoCancelRequest(MockUtils.aPaylineResetRequest());
+        CancelRequest request = new CancelRequest(MockUtils.aPaylineResetRequest());
 
         // create Mock
         StringResponse stringResponse = MockUtils.mockStringResponse(
@@ -118,7 +116,7 @@ class HttpClientTest {
 
 
         // test method
-        CVCoPaymentResponse response = client.cancelTransaction(configuration, request);
+        PaymentResponse response = client.cancelTransaction(configuration, request);
 
         // assertions
         Assertions.assertNotNull(response);
@@ -133,7 +131,7 @@ class HttpClientTest {
                 , MockUtils.anEnvironment()
                 , MockUtils.aPartnerConfiguration()
         );
-        CVCoGetTransactionStatusRequest request = new CVCoGetTransactionStatusRequest("1");
+        GetTransactionStatusRequest request = new GetTransactionStatusRequest("1");
 
         // create Mock
         StringResponse stringResponse = MockUtils.mockStringResponse(
@@ -145,7 +143,7 @@ class HttpClientTest {
 
 
         // test method
-        CVCoPaymentResponse response = client.getTransactionStatus(configuration, request);
+        PaymentResponse response = client.getTransactionStatus(configuration, request);
 
         // assertions
         Assertions.assertNotNull(response);

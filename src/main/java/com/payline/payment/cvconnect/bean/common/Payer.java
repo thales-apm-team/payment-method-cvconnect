@@ -3,9 +3,9 @@ package com.payline.payment.cvconnect.bean.common;
 public class Payer {
 
     private String beneficiaryId;
-    private CVAmount amount;
+    private Amount amount;
 
-    public Payer(String beneficiaryId, CVAmount amount) {
+    public Payer(String beneficiaryId, Amount amount) {
         this.beneficiaryId = beneficiaryId;
         this.amount = amount;
     }
@@ -14,7 +14,7 @@ public class Payer {
         return beneficiaryId;
     }
 
-    public CVAmount getAmount() {
+    public Amount getAmount() {
         return amount;
     }
 }

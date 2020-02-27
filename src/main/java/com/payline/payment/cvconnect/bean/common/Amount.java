@@ -1,10 +1,10 @@
 package com.payline.payment.cvconnect.bean.common;
 
-public class CVAmount {
+public class Amount {
     private String total;
     private int currency;
 
-    public CVAmount(String total, int currency) {
+    public Amount(String total, int currency) {
         this.total = total;
         this.currency = currency;
     }

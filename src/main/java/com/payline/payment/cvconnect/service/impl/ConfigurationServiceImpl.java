@@ -1,8 +1,8 @@
 package com.payline.payment.cvconnect.service.impl;
 
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
-import com.payline.payment.cvconnect.bean.request.CVCoCreateTransactionRequest;
-import com.payline.payment.cvconnect.bean.response.CVCoResponse;
+import com.payline.payment.cvconnect.bean.request.CreateTransactionRequest;
+import com.payline.payment.cvconnect.bean.response.Response;
 import com.payline.payment.cvconnect.utils.Constants;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.payment.cvconnect.utils.i18n.I18nService;
@@ -60,8 +60,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                         , request.getEnvironment()
                         , request.getPartnerConfiguration()
                 );
-                CVCoCreateTransactionRequest createTransactionRequest = new CVCoCreateTransactionRequest(request);
-                CVCoResponse response = client.createTransaction(configuration, createTransactionRequest);
+                CreateTransactionRequest createTransactionRequest = new CreateTransactionRequest(request);
+                Response response = client.createTransaction(configuration, createTransactionRequest);
 
                 if (!response.isOk() && "MERCHANT_NOT_ALLOWED".equalsIgnoreCase(response.getErrorCode())) {
                     errors.put(Constants.ContractConfigurationKeys.SHOP_ID_KEY, i18n.getMessage(WRONG_SHOP_ID, request.getLocale()));

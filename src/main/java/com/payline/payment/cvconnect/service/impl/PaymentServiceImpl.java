@@ -2,14 +2,13 @@ package com.payline.payment.cvconnect.service.impl;
 
 import com.payline.payment.cvconnect.bean.common.Transaction;
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
-import com.payline.payment.cvconnect.bean.request.CVCoConfirmTransactionRequest;
-import com.payline.payment.cvconnect.bean.request.CVCoCreateTransactionRequest;
-import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
+import com.payline.payment.cvconnect.bean.request.ConfirmTransactionRequest;
+import com.payline.payment.cvconnect.bean.request.CreateTransactionRequest;
+import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
-import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseActiveWaiting;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
 import com.payline.pmapi.logger.LogManager;
@@ -22,7 +21,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 
     @Override
-    public PaymentResponse paymentRequest(PaymentRequest paymentRequest) {
+    public com.payline.pmapi.bean.payment.response.PaymentResponse paymentRequest(PaymentRequest paymentRequest) {
         try {
             // init data
             RequestConfiguration requestConfiguration = new RequestConfiguration(
@@ -32,8 +31,8 @@ public class PaymentServiceImpl implements PaymentService {
             );
 
             //  call httpClient to create the transaction
-            CVCoCreateTransactionRequest createTransactionRequest = new CVCoCreateTransactionRequest(paymentRequest);
-            CVCoPaymentResponse createResponse = client.createTransaction(requestConfiguration, createTransactionRequest);
+            CreateTransactionRequest createTransactionRequest = new CreateTransactionRequest(paymentRequest);
+            PaymentResponse createResponse = client.createTransaction(requestConfiguration, createTransactionRequest);
 
             // check response object
             if (!createResponse.isOk()) {
@@ -60,8 +59,8 @@ public class PaymentServiceImpl implements PaymentService {
             }
 
             // call httpClient to confirm the transaction
-            CVCoConfirmTransactionRequest confirmTransactionRequest = new CVCoConfirmTransactionRequest(paymentRequest, partnerTransactionId);
-            CVCoPaymentResponse confirmResponse = client.confirmTransaction(requestConfiguration, confirmTransactionRequest);
+            ConfirmTransactionRequest confirmTransactionRequest = new ConfirmTransactionRequest(paymentRequest, partnerTransactionId);
+            PaymentResponse confirmResponse = client.confirmTransaction(requestConfiguration, confirmTransactionRequest);
 
             // check response object
             if (!confirmResponse.isOk()) {

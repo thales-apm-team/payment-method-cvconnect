@@ -3,15 +3,14 @@ package com.payline.payment.cvconnect.bean;
 import com.payline.payment.cvconnect.MockUtils;
 import com.payline.payment.cvconnect.bean.common.Transaction;
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
-import com.payline.payment.cvconnect.bean.request.CVCoCancelRequest;
-import com.payline.payment.cvconnect.bean.request.CVCoConfirmTransactionRequest;
-import com.payline.payment.cvconnect.bean.request.CVCoCreateTransactionRequest;
-import com.payline.payment.cvconnect.bean.request.CVCoGetTransactionStatusRequest;
-import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
+import com.payline.payment.cvconnect.bean.request.CancelRequest;
+import com.payline.payment.cvconnect.bean.request.ConfirmTransactionRequest;
+import com.payline.payment.cvconnect.bean.request.CreateTransactionRequest;
+import com.payline.payment.cvconnect.bean.request.GetTransactionStatusRequest;
+import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.pmapi.bean.common.*;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
-import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseOnHold;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
@@ -30,7 +29,7 @@ class BeanTest {
     void createTransactionRequestTest() {
         PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
 
-        CVCoCreateTransactionRequest request = new CVCoCreateTransactionRequest(paymentRequest);
+        CreateTransactionRequest request = new CreateTransactionRequest(paymentRequest);
         Assertions.assertNotNull(request.getMerchant());
         Assertions.assertNotNull(request.getOrder());
         Assertions.assertNotNull(request.getPaymentMethod());
@@ -47,7 +46,7 @@ class BeanTest {
                 , contractRequest.getPartnerConfiguration()
         );
 
-        CVCoCreateTransactionRequest request = new CVCoCreateTransactionRequest(contractRequest);
+        CreateTransactionRequest request = new CreateTransactionRequest(contractRequest);
         Assertions.assertNotNull(request.getMerchant());
         Assertions.assertNotNull(request.getOrder());
         Assertions.assertNotNull(request.getPaymentMethod());
@@ -65,7 +64,7 @@ class BeanTest {
                 , paymentRequest.getPartnerConfiguration()
         );
 
-        CVCoConfirmTransactionRequest request = new CVCoConfirmTransactionRequest(paymentRequest, "1");
+        ConfirmTransactionRequest request = new ConfirmTransactionRequest(paymentRequest, "1");
         Assertions.assertNotNull(request.getId());
         Assertions.assertNotNull(request.getPayer());
         Assertions.assertNotNull(request.getANCVSecurity());
@@ -79,7 +78,7 @@ class BeanTest {
                 , MockUtils.aPartnerConfiguration()
         );
 
-        CVCoGetTransactionStatusRequest request = new CVCoGetTransactionStatusRequest("1");
+        GetTransactionStatusRequest request = new GetTransactionStatusRequest("1");
         Assertions.assertNotNull(request.getId());
         Assertions.assertNotNull(request.getANCVSecurity());
     }
@@ -88,7 +87,7 @@ class BeanTest {
     void cancelRequestTest() {
         ResetRequest resetRequest = MockUtils.aPaylineResetRequest();
 
-        CVCoCancelRequest request = new CVCoCancelRequest(resetRequest);
+        CancelRequest request = new CancelRequest(resetRequest);
         Assertions.assertNotNull(request.getId());
         Assertions.assertNotNull(request.getReason());
         Assertions.assertNotNull(request.getANCVSecurity());
@@ -97,7 +96,7 @@ class BeanTest {
     @Test
     void PaymentResponseTest() {
         String json = MockUtils.aCVCoResponse("foo");
-        CVCoPaymentResponse response = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse response = PaymentResponse.fromJson(json);
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getTransaction());
@@ -108,7 +107,7 @@ class BeanTest {
     @Test
     void PaymentErrorResponseTest(){
         String json = MockUtils.anErrorCVCoResponse("foo");
-        CVCoPaymentResponse response = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse response = PaymentResponse.fromJson(json);
 
         Assertions.assertFalse(response.isOk());
         Assertions.assertNotNull(response.getErrorCode());
@@ -137,7 +136,7 @@ class BeanTest {
     @MethodSource("statusSet")
     void PaymentResponsePaylineStatusTest(String status, Class expectedStatusClass, FailureCause expectedCause) {
         String json = MockUtils.aCVCoResponse(status);
-        CVCoPaymentResponse response = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse response = PaymentResponse.fromJson(json);
 
         Assertions.assertNotNull(response);
         TransactionStatus transactionStatus = response.getPaylineStatus();
@@ -169,10 +168,10 @@ class BeanTest {
     @MethodSource("statusSet2")
     void PaymentResponsePaylinePaymentResponseTest(String status, Class expectedStatusClass, FailureCause expectedCause) {
         String json = MockUtils.aCVCoResponse(status);
-        CVCoPaymentResponse response = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse response = PaymentResponse.fromJson(json);
 
         Assertions.assertNotNull(response);
-        PaymentResponse paymentResponse = response.getPaylinePaymentResponse();
+        com.payline.pmapi.bean.payment.response.PaymentResponse paymentResponse = response.getPaylinePaymentResponse();
         Assertions.assertEquals(expectedStatusClass, paymentResponse.getClass());
         if (expectedStatusClass.equals(PaymentResponseFailure.class)){
             PaymentResponseFailure responseFailure = (PaymentResponseFailure) paymentResponse;
@@ -202,7 +201,7 @@ class BeanTest {
     @MethodSource("statusSet3")
     void PaymentResponseFailureCause(String errorCode, FailureCause expectedFailureCause){
         String json = MockUtils.anErrorCVCoResponse(errorCode);
-        CVCoPaymentResponse response = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse response = PaymentResponse.fromJson(json);
 
         Assertions.assertEquals(expectedFailureCause, response.getFailureCause());
 

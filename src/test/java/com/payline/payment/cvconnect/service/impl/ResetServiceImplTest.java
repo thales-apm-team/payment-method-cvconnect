@@ -2,7 +2,7 @@ package com.payline.payment.cvconnect.service.impl;
 
 import com.payline.payment.cvconnect.MockUtils;
 import com.payline.payment.cvconnect.bean.common.Transaction;
-import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
+import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -17,8 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ResetServiceImplTest {
     @InjectMocks
@@ -37,7 +35,7 @@ class ResetServiceImplTest {
         ResetRequest request = MockUtils.aPaylineResetRequest();
 
         String json = MockUtils.aCVCoResponse(Transaction.State.CANCELLED);
-        CVCoPaymentResponse cvCoPaymentResponse = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json);
 
         // create mock
         Mockito.doReturn(cvCoPaymentResponse).when(client).cancelTransaction(Mockito.any(), Mockito.any());
@@ -53,7 +51,7 @@ class ResetServiceImplTest {
         ResetRequest request = MockUtils.aPaylineResetRequest();
 
         String json = MockUtils.anErrorCVCoResponse("foo");
-        CVCoPaymentResponse cvCoPaymentResponse = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json);
 
         // create mock
         Mockito.doReturn(cvCoPaymentResponse).when(client).cancelTransaction(Mockito.any(), Mockito.any());
@@ -69,7 +67,7 @@ class ResetServiceImplTest {
         ResetRequest request = MockUtils.aPaylineResetRequest();
 
         String json = MockUtils.aCVCoResponse(Transaction.State.ABORTED);
-        CVCoPaymentResponse cvCoPaymentResponse = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json);
 
         // create mock
         Mockito.doReturn(cvCoPaymentResponse).when(client).cancelTransaction(Mockito.any(), Mockito.any());

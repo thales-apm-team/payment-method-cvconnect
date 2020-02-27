@@ -2,7 +2,7 @@ package com.payline.payment.cvconnect.bean.response;
 
 import com.payline.pmapi.bean.common.FailureCause;
 
-public class CVCoResponse {
+public class Response {
     private String errorCode;
     private String errorMessage;
 

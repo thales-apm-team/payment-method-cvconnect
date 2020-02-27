@@ -7,10 +7,10 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public abstract class CVCoRequest {
+public abstract class Request {
     private String requestDate;
 
-    CVCoRequest() {
+    Request() {
         this.requestDate = ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT );
     }
 

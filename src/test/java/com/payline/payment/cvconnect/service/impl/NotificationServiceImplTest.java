@@ -2,7 +2,7 @@ package com.payline.payment.cvconnect.service.impl;
 
 import com.payline.payment.cvconnect.MockUtils;
 import com.payline.payment.cvconnect.bean.common.Transaction;
-import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
+import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -39,7 +39,7 @@ class NotificationServiceImplTest {
     void parse() {
         String transactionId  ="123123123";
         String json = MockUtils.aCVCoResponse(Transaction.State.PAID);
-        CVCoPaymentResponse cvCoPaymentResponse = CVCoPaymentResponse.fromJson(json);
+        PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json);
 
         NotificationRequest request = MockUtils.aPaylineNotificationRequestBuilder()
                 .withContent(new ByteArrayInputStream(json.getBytes()))
@@ -63,7 +63,7 @@ class NotificationServiceImplTest {
         String transactionId  ="123123123";
         String json = MockUtils.aCVCoResponse("foo");
         String json2= MockUtils.anErrorCVCoResponse("foo");
-        CVCoPaymentResponse cvCoPaymentResponse = CVCoPaymentResponse.fromJson(json2);
+        PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json2);
 
 
         NotificationRequest request = MockUtils.aPaylineNotificationRequestBuilder()

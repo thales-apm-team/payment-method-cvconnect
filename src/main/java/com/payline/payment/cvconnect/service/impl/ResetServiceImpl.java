@@ -2,8 +2,8 @@ package com.payline.payment.cvconnect.service.impl;
 
 import com.payline.payment.cvconnect.bean.common.Transaction;
 import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
-import com.payline.payment.cvconnect.bean.request.CVCoCancelRequest;
-import com.payline.payment.cvconnect.bean.response.CVCoPaymentResponse;
+import com.payline.payment.cvconnect.bean.request.CancelRequest;
+import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -23,13 +23,13 @@ public class ResetServiceImpl implements ResetService {
     public ResetResponse resetRequest(ResetRequest resetRequest) {
         String partnerTransactionId = resetRequest.getPartnerTransactionId();
         try {
-            CVCoCancelRequest cvCoCancelRequest = new CVCoCancelRequest(resetRequest);
+            CancelRequest cancelRequest = new CancelRequest(resetRequest);
             RequestConfiguration configuration = new RequestConfiguration(
                     resetRequest.getContractConfiguration()
                     , resetRequest.getEnvironment()
                     , resetRequest.getPartnerConfiguration()
             );
-            CVCoPaymentResponse response = client.cancelTransaction(configuration, cvCoCancelRequest);
+            PaymentResponse response = client.cancelTransaction(configuration, cancelRequest);
 
             if (!response.isOk()) {
                 // return a failure

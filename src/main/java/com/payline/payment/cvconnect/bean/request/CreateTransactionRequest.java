@@ -1,7 +1,6 @@
 package com.payline.payment.cvconnect.bean.request;
 
 import com.payline.payment.cvconnect.bean.common.*;
-import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
 import com.payline.payment.cvconnect.utils.Constants;
 import com.payline.payment.cvconnect.utils.PluginUtils;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
@@ -10,7 +9,7 @@ import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CVCoCreateTransactionRequest extends CVCoRequest {
+public class CreateTransactionRequest extends Request {
 
     private Merchant merchant;
     private Order order;
@@ -18,21 +17,21 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
     private RedirectUrls redirectUrls;
 
 
-    public CVCoCreateTransactionRequest(ContractParametersCheckRequest request) {
+    public CreateTransactionRequest(ContractParametersCheckRequest request) {
         super();
         this.merchant = new Merchant(
                 request.getAccountInfo().get(Constants.ContractConfigurationKeys.SHOP_ID_KEY)
                 , request.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.SERVICE_PROVIDER_ID)
         );
         this.order = new Order("01", "anId", "aLabel",
-                new CVAmount("2000", 978));
+                new Amount("2000", 978));
 
         this.paymentMethod = new PaymentMethod("001", "NORMAL", null);
         this.redirectUrls = new RedirectUrls("anUrl", "anUrl");
     }
 
 
-    public CVCoCreateTransactionRequest(PaymentRequest request) {
+    public CreateTransactionRequest(PaymentRequest request) {
         super();
         this.merchant = new Merchant(
                 request.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.SHOP_ID_KEY).getValue()
@@ -42,7 +41,7 @@ public class CVCoCreateTransactionRequest extends CVCoRequest {
                 PluginUtils.truncate(request.getOrder().getReference(), 20)
                 , request.getTransactionId()
                 , request.getSoftDescriptor()
-                , new CVAmount(
+                , new Amount(
                 request.getAmount().getAmountInSmallestUnit().toString()
                 , request.getAmount().getCurrency().getNumericCode()
         )
