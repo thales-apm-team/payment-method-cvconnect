@@ -61,7 +61,7 @@ class NotificationServiceImplTest {
     @Test
     void parseErrorResponse() {
         String transactionId  ="123123123";
-        String json = MockUtils.aCVCoResponse("foo");
+        String json = MockUtils.aCVCoResponse(Transaction.State.AUTHORIZED);
         String json2= MockUtils.anErrorCVCoResponse("foo");
         PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json2);
 
@@ -86,7 +86,7 @@ class NotificationServiceImplTest {
     @Test
     void parsePluginException() {
         String transactionId  ="123123123";
-        String json = MockUtils.aCVCoResponse("foo");
+        String json = MockUtils.aCVCoResponse(Transaction.State.AUTHORIZED);
 
         NotificationRequest request = MockUtils.aPaylineNotificationRequestBuilder()
                 .withContent(new ByteArrayInputStream(json.getBytes()))
@@ -109,7 +109,7 @@ class NotificationServiceImplTest {
     @Test
     void parseRuntimeException() {
         String transactionId  ="123123123";
-        String json = MockUtils.aCVCoResponse("foo");
+        String json = MockUtils.aCVCoResponse(Transaction.State.AUTHORIZED);
 
         NotificationRequest request = MockUtils.aPaylineNotificationRequestBuilder()
                 .withContent(new ByteArrayInputStream(json.getBytes()))

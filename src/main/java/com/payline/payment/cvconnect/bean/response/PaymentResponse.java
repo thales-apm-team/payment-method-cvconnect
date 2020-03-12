@@ -10,6 +10,8 @@ import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseOnHold;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 
+import static com.payline.payment.cvconnect.bean.common.Transaction.*;
+
 public class PaymentResponse extends Response {
     private Transaction transaction;
 
@@ -22,14 +24,14 @@ public class PaymentResponse extends Response {
         BuyerPaymentId buyerPaymentId = new EmptyTransactionDetails();
         com.payline.pmapi.bean.payment.response.PaymentResponse response;
 
-        switch (this.transaction.getState()) {
-            case Transaction.State.INITIALIZED:
+        switch ( this.transaction.getState()) {
+            case INITIALIZED:
 
             // non final states
-            case Transaction.State.PROCESSING:
-            case Transaction.State.AUTHORIZED:
-            case Transaction.State.VALIDATED:
-            case Transaction.State.CONSIGNED:
+            case PROCESSING:
+            case AUTHORIZED:
+            case VALIDATED:
+            case CONSIGNED:
                 response = PaymentResponseOnHold.PaymentResponseOnHoldBuilder
                         .aPaymentResponseOnHold()
                         .withOnHoldCause(OnHoldCause.ASYNC_RETRY)
@@ -39,8 +41,8 @@ public class PaymentResponse extends Response {
                 break;
 
                 // final states
-            case Transaction.State.CANCELLED:
-            case Transaction.State.PAID:
+            case CANCELLED:
+            case PAID:
                 response = PaymentResponseSuccess.PaymentResponseSuccessBuilder
                         .aPaymentResponseSuccess()
                         .withPartnerTransactionId(this.transaction.getId())
@@ -49,7 +51,7 @@ public class PaymentResponse extends Response {
                         .build();
 
                 break;
-            case Transaction.State.REJECTED:
+            case REJECTED:
                 response = PaymentResponseFailure.PaymentResponseFailureBuilder
                         .aPaymentResponseFailure()
                         .withPartnerTransactionId(this.transaction.getId())
@@ -58,7 +60,7 @@ public class PaymentResponse extends Response {
                         .withTransactionDetails(buyerPaymentId)
                         .build();
                 break;
-            case Transaction.State.ABORTED:
+            case ABORTED:
                 response = PaymentResponseFailure.PaymentResponseFailureBuilder
                         .aPaymentResponseFailure()
                         .withPartnerTransactionId(this.transaction.getId())
@@ -68,7 +70,7 @@ public class PaymentResponse extends Response {
                         .build();
                 break;
 
-            case Transaction.State.EXPIRED:
+            case EXPIRED:
                 response = PaymentResponseFailure.PaymentResponseFailureBuilder
                         .aPaymentResponseFailure()
                         .withPartnerTransactionId(this.transaction.getId())
@@ -96,34 +98,34 @@ public class PaymentResponse extends Response {
         TransactionStatus paylineStatus;
 
         switch (this.transaction.getState()) {
-            case Transaction.State.INITIALIZED:
+            case INITIALIZED:
 
                 // non final states
-            case Transaction.State.PROCESSING:
-            case Transaction.State.AUTHORIZED:
-            case Transaction.State.VALIDATED:
-            case Transaction.State.CONSIGNED:
+            case PROCESSING:
+            case AUTHORIZED:
+            case VALIDATED:
+            case CONSIGNED:
                 paylineStatus = OnHoldTransactionStatus.builder()
                         .onHoldCause(OnHoldCause.ASYNC_RETRY)
                         .build();
                 break;
 
             // final states
-            case Transaction.State.CANCELLED:
-            case Transaction.State.PAID:
+            case CANCELLED:
+            case PAID:
                 paylineStatus = SuccessTransactionStatus.builder().build();
                 break;
-            case Transaction.State.REJECTED:
+            case REJECTED:
                 paylineStatus = FailureTransactionStatus.builder()
                         .failureCause(FailureCause.REFUSED)
                         .build();
                 break;
-            case Transaction.State.ABORTED:
+            case ABORTED:
                 paylineStatus = FailureTransactionStatus.builder()
                         .failureCause(FailureCause.CANCEL)
                         .build();
                 break;
-            case Transaction.State.EXPIRED:
+            case EXPIRED:
                 paylineStatus = FailureTransactionStatus.builder()
                         .failureCause(FailureCause.SESSION_EXPIRED)
                         .build();

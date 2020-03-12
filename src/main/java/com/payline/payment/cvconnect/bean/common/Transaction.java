@@ -1,8 +1,10 @@
 package com.payline.payment.cvconnect.bean.common;
 
+import com.payline.payment.cvconnect.utils.PluginUtils;
+
 public class Transaction {
     private String id;
-    private String state;
+    private State state;
     private String subState;
     private String creationDate;
     private String updateDate;
@@ -14,7 +16,7 @@ public class Transaction {
         return id;
     }
 
-    public String getState() {
+    public State getState() {
         return state;
     }
 
@@ -22,8 +24,12 @@ public class Transaction {
         return subState;
     }
 
-    public String getFullState(){
-       return String.join(".", state, subState);
+    public String getFullState() {
+        String fullState = String.valueOf(state);
+        if (!PluginUtils.isEmpty(subState)){
+            fullState += "." + subState;
+        }
+        return fullState;
     }
 
     public String getCreationDate() {
@@ -42,20 +48,8 @@ public class Transaction {
         return merchant;
     }
 
-    public static class State{
+    public enum State {
+        INITIALIZED, PROCESSING, AUTHORIZED, VALIDATED, CONSIGNED, PAID, REJECTED, ABORTED, CANCELLED, EXPIRED
 
-        private State() {
         }
-
-        public static final String INITIALIZED = "INITIALIZED";
-        public static final String PROCESSING = "PROCESSING";
-        public static final String AUTHORIZED = "AUTHORIZED";
-        public static final String VALIDATED = "VALIDATED";
-        public static final String CONSIGNED = "CONSIGNED";
-        public static final String PAID = "PAID";
-        public static final String REJECTED = "REJECTED";
-        public static final String ABORTED = "ABORTED";
-        public static final String CANCELLED = "CANCELLED";
-        public static final String EXPIRED = "EXPIRED";
-    }
 }

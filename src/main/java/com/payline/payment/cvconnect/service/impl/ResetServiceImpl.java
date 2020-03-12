@@ -41,7 +41,7 @@ public class ResetServiceImpl implements ResetService {
                         .build();
             }
 
-            if (!Transaction.State.CANCELLED.equalsIgnoreCase(response.getTransaction().getState())) {
+            if (!Transaction.State.CANCELLED.equals(response.getTransaction().getState())) {
                 // return a failure
                 String errorMessage = "Invalid transaction State";
                 LOGGER.info(errorMessage);

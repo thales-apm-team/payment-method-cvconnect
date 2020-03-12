@@ -26,7 +26,7 @@ public class PaymentServiceImpl implements PaymentService {
             // init data
             RequestConfiguration requestConfiguration = new RequestConfiguration(
                     paymentRequest.getContractConfiguration()
-                    ,paymentRequest.getEnvironment()
+                    , paymentRequest.getEnvironment()
                     , paymentRequest.getPartnerConfiguration()
             );
 
@@ -45,9 +45,9 @@ public class PaymentServiceImpl implements PaymentService {
 
             // get transactionId and state
             String partnerTransactionId = createResponse.getTransaction().getId();
-            String state = createResponse.getTransaction().getState();
 
-            if (!Transaction.State.INITIALIZED.equalsIgnoreCase(state)) {
+
+            if (!Transaction.State.INITIALIZED.equals(createResponse.getTransaction().getState())) {
                 String errorMessage = "Invalid transaction State";
                 LOGGER.info(errorMessage);
                 return PaymentResponseFailure.PaymentResponseFailureBuilder
