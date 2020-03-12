@@ -17,6 +17,8 @@ import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.NotificationService;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Date;
+
 public class NotificationServiceImpl implements NotificationService {
     private static final Logger LOGGER = LogManager.getLogger(PaymentServiceImpl.class);
     private HttpClient client = HttpClient.getInstance();
@@ -47,6 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .withPartnerTransactionId(partnerTransactionId)
                     .withTransactionId(transactionId)
                     .withTransactionStatus(failureStatus)
+                    .withStatusDate(new Date())
                     .build();
 
         } catch (RuntimeException e) {
