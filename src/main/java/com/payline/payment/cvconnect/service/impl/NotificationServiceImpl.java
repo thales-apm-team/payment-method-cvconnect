@@ -1,18 +1,20 @@
 package com.payline.payment.cvconnect.service.impl;
 
-import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
-import com.payline.payment.cvconnect.bean.request.GetTransactionStatusRequest;
-import com.payline.payment.cvconnect.bean.response.PaymentResponse;
+import com.payline.payment.cvconnect.bean.common.Transaction;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.PluginUtils;
-import com.payline.payment.cvconnect.utils.http.HttpClient;
-import com.payline.pmapi.bean.common.FailureCause;
-import com.payline.pmapi.bean.common.FailureTransactionStatus;
-import com.payline.pmapi.bean.common.TransactionStatus;
+import com.payline.pmapi.bean.common.*;
 import com.payline.pmapi.bean.notification.request.NotificationRequest;
 import com.payline.pmapi.bean.notification.response.NotificationResponse;
+import com.payline.pmapi.bean.notification.response.impl.IgnoreNotificationResponse;
+import com.payline.pmapi.bean.notification.response.impl.PaymentResponseByNotificationResponse;
 import com.payline.pmapi.bean.notification.response.impl.TransactionStateChangedResponse;
 import com.payline.pmapi.bean.payment.request.NotifyTransactionStatusRequest;
+import com.payline.pmapi.bean.payment.response.PaymentResponse;
+import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.impl.Email;
+import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.impl.EmptyTransactionDetails;
+import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
+import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.NotificationService;
 import org.apache.logging.log4j.Logger;
@@ -21,36 +23,79 @@ import java.util.Date;
 
 public class NotificationServiceImpl implements NotificationService {
     private static final Logger LOGGER = LogManager.getLogger(PaymentServiceImpl.class);
-    private HttpClient client = HttpClient.getInstance();
 
     @Override
     public NotificationResponse parse(NotificationRequest request) {
+        NotificationResponse notificationResponse;
         String transactionId = request.getTransactionId();
         String partnerTransactionId = "UNKNOWN";
-
         try {
             // init data
             String content = PluginUtils.inputStreamToString(request.getContent());
-            PaymentResponse cvcoNotificationResponse = PaymentResponse.fromJson(content);
-            partnerTransactionId = cvcoNotificationResponse.getTransaction().getId();
-            RequestConfiguration configuration = new RequestConfiguration(request.getContractConfiguration(), request.getEnvironment(), request.getPartnerConfiguration());
+            com.payline.payment.cvconnect.bean.response.PaymentResponse notificationPaymentResponse = com.payline.payment.cvconnect.bean.response.PaymentResponse.fromJson(content);
+            Transaction transaction = notificationPaymentResponse.getTransaction();
+            partnerTransactionId = transaction.getId();
 
-            // get final status
-            GetTransactionStatusRequest getTransactionStatusRequest = new GetTransactionStatusRequest(partnerTransactionId);
-            return getTransactionStateChangedResponseFromNotificationRequest(transactionId, partnerTransactionId, configuration, getTransactionStatusRequest);
+            switch (transaction.getState()) {
+                case VALIDATED:
+                    // PaymentResponseByNotificationResponse => Success
+                    PaymentResponse paymentResponse = PaymentResponseSuccess.PaymentResponseSuccessBuilder
+                            .aPaymentResponseSuccess()
+                            .withPartnerTransactionId(partnerTransactionId)
+                            .withStatusCode(transaction.getFullState())
+                            .withTransactionDetails(Email.EmailBuilder.anEmail().withEmail(transaction.getPayer().getBeneficiaryId()).build())
+                            .build();
 
-        } catch (PluginException e) {
-            TransactionStatus failureStatus = FailureTransactionStatus.builder()
-                    .failureCause(e.getFailureCause())
-                    .build();
+                    notificationResponse = createPaymentResponseByNotification(transactionId, paymentResponse);
+                    break;
 
-            return TransactionStateChangedResponse.TransactionStateChangedResponseBuilder
-                    .aTransactionStateChangedResponse()
-                    .withPartnerTransactionId(partnerTransactionId)
-                    .withTransactionId(transactionId)
-                    .withTransactionStatus(failureStatus)
-                    .withStatusDate(new Date())
-                    .build();
+                case ABORTED:
+                    // PaymentResponseByNotificationResponse => Failure
+                    paymentResponse = PaymentResponseFailure.PaymentResponseFailureBuilder
+                            .aPaymentResponseFailure()
+                            .withPartnerTransactionId(partnerTransactionId)
+                            .withErrorCode(transaction.getFullState())
+                            .withFailureCause(FailureCause.CANCEL)
+                            .withTransactionDetails(new EmptyTransactionDetails())
+                            .build();
+
+                    notificationResponse = createPaymentResponseByNotification(transactionId, paymentResponse);
+                    break;
+                case EXPIRED:
+                    // PaymentResponseByNotificationResponse => Failure
+                    paymentResponse = PaymentResponseFailure.PaymentResponseFailureBuilder
+                            .aPaymentResponseFailure()
+                            .withPartnerTransactionId(partnerTransactionId)
+                            .withErrorCode(transaction.getFullState())
+                            .withFailureCause(FailureCause.SESSION_EXPIRED)
+                            .withTransactionDetails(new EmptyTransactionDetails())
+                            .build();
+
+                    notificationResponse = createPaymentResponseByNotification(transactionId, paymentResponse);
+                    break;
+
+                // TransactionStateChangedResponse
+                case CONSIGNED:
+                    TransactionStatus paylineStatus = OnHoldTransactionStatus.builder().onHoldCause(OnHoldCause.ASYNC_RETRY).build();
+                    notificationResponse = createTransactionStateChanged(transactionId, partnerTransactionId, paylineStatus);
+                    break;
+                case REJECTED:
+                    paylineStatus = FailureTransactionStatus.builder().failureCause(FailureCause.REFUSED).build();
+                    notificationResponse = createTransactionStateChanged(transactionId, partnerTransactionId, paylineStatus);
+                    break;
+                case PAID:
+                case CANCELLED:
+                    paylineStatus = SuccessTransactionStatus.builder().build();
+                    notificationResponse = createTransactionStateChanged(transactionId, partnerTransactionId, paylineStatus);
+                    break;
+                case INITIALIZED:
+                case PROCESSING:
+                case AUTHORIZED:
+                default:
+                    notificationResponse = new IgnoreNotificationResponse();
+                    break;
+
+            }
 
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
@@ -58,13 +103,15 @@ public class NotificationServiceImpl implements NotificationService {
                     .failureCause(FailureCause.INTERNAL_ERROR)
                     .build();
 
-            return TransactionStateChangedResponse.TransactionStateChangedResponseBuilder
+            notificationResponse = TransactionStateChangedResponse.TransactionStateChangedResponseBuilder
                     .aTransactionStateChangedResponse()
                     .withPartnerTransactionId(partnerTransactionId)
                     .withTransactionId(transactionId)
                     .withTransactionStatus(failureStatus)
                     .build();
         }
+
+        return notificationResponse;
     }
 
     @Override
@@ -73,36 +120,27 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
-    /**
-     * Call CVConnect API to get the final transaction Status and return a TransactionStateChangedResponse
-     *
-     * @param transactionId
-     * @param partnerTransactionId
-     * @param configuration
-     * @param request
-     * @return
-     */
-    private TransactionStateChangedResponse getTransactionStateChangedResponseFromNotificationRequest(String transactionId, String partnerTransactionId, RequestConfiguration configuration, GetTransactionStatusRequest request) {
-        PaymentResponse response = client.getTransactionStatus(configuration, request);
-        // check response object
-        if (!response.isOk()) {
-            TransactionStatus failureStatus = FailureTransactionStatus.builder()
-                    .failureCause(FailureCause.INVALID_DATA)
-                    .build();
+    private PaymentResponseByNotificationResponse createPaymentResponseByNotification(String transactionId, PaymentResponse paymentResponse) {
+        TransactionCorrelationId correlationId = TransactionCorrelationId.TransactionCorrelationIdBuilder
+                .aCorrelationIdBuilder()
+                .withType(TransactionCorrelationId.CorrelationIdType.TRANSACTION_ID)
+                .withValue(transactionId)
+                .build();
 
-            return TransactionStateChangedResponse.TransactionStateChangedResponseBuilder
-                    .aTransactionStateChangedResponse()
-                    .withPartnerTransactionId(partnerTransactionId)
-                    .withTransactionId(transactionId)
-                    .withTransactionStatus(failureStatus)
-                    .build();
-        } else {
-            return TransactionStateChangedResponse.TransactionStateChangedResponseBuilder
-                    .aTransactionStateChangedResponse()
-                    .withPartnerTransactionId(partnerTransactionId)
-                    .withTransactionId(transactionId)
-                    .withTransactionStatus(response.getPaylineStatus())
-                    .build();
-        }
+        return PaymentResponseByNotificationResponse.PaymentResponseByNotificationResponseBuilder
+                .aPaymentResponseByNotificationResponseBuilder()
+                .withPaymentResponse(paymentResponse)
+                .withTransactionCorrelationId(correlationId)
+                .build();
+    }
+
+    private TransactionStateChangedResponse createTransactionStateChanged(String transactionId, String partnerTransactionId, TransactionStatus status) {
+        return TransactionStateChangedResponse.TransactionStateChangedResponseBuilder
+                .aTransactionStateChangedResponse()
+                .withPartnerTransactionId(partnerTransactionId)
+                .withTransactionId(transactionId)
+                .withTransactionStatus(status)
+                .withStatusDate(new Date())
+                .build();
     }
 }

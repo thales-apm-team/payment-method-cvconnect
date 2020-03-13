@@ -2,6 +2,8 @@ package com.payline.payment.cvconnect.bean.common;
 
 import com.payline.payment.cvconnect.utils.PluginUtils;
 
+import java.util.List;
+
 public class Transaction {
     private String id;
     private State state;
@@ -9,6 +11,8 @@ public class Transaction {
     private String creationDate;
     private String updateDate;
     private String expirationDate;
+    private Order order;
+    private List<Payer> payers;
 
     private Merchant merchant;
 
@@ -46,6 +50,15 @@ public class Transaction {
 
     public Merchant getMerchant() {
         return merchant;
+    }
+
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public Payer getPayer() {
+        return payers.get(0);
     }
 
     public enum State {

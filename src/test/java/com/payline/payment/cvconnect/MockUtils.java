@@ -309,7 +309,22 @@ public class MockUtils {
                 "            \"amount\": { \"total\": 2000, \"currency\": \"978\" }" +
                 "        }," +
                 "        \"paymentMethod\": { \"tspdMode\": \"001\", \"captureMode\": \"NORMAL\", \"captureDate\": \"2019-11-29T14:13:56.827+01:00\" }," +
-                "        \"redirectUrls\": { \"returnUrl\": \"http://url.com\", \"cancelUrl\": \"http://url2.com\" }" +
+                "        \"redirectUrls\": { \"returnUrl\": \"http://url.com\", \"cancelUrl\": \"http://url2.com\" }," +
+                "\"payers\": [" +
+                "      {" +
+                "        \"beneficiaryId\": \"ntrupond71@yopmail.com\"," +
+                "        \"amount\": { \"total\": 4000, \"currency\": \"978\" }," +
+                "        \"authorizations\": [" +
+                "          {" +
+                "            \"number\": \"flff6j6r3a\"," +
+                "            \"type\": \"CVCo\"," +
+                "            \"amount\": { \"total\": 2000, \"currency\": \"978\" }," +
+                "            \"validationDate\": \"2020-03-10T15:39:14.251+01:00\"," +
+                "            \"holder\": \"10*****3051\"" +
+                "          }" +
+                "        ]" +
+                "      }" +
+                "    ]" +
                 "    }" +
                 "}";
         return s;

@@ -7,12 +7,9 @@ import com.payline.payment.cvconnect.bean.request.ConfirmTransactionRequest;
 import com.payline.payment.cvconnect.bean.request.CreateTransactionRequest;
 import com.payline.payment.cvconnect.bean.request.GetTransactionStatusRequest;
 import com.payline.payment.cvconnect.bean.response.PaymentResponse;
-import com.payline.pmapi.bean.common.*;
+import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
-import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
-import com.payline.pmapi.bean.payment.response.impl.PaymentResponseOnHold;
-import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -83,8 +80,8 @@ class BeanTest {
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getTransaction());
-        Assertions.assertNotNull(response.getPaylineStatus());
-        Assertions.assertNotNull(response.getPaylinePaymentResponse());
+//        Assertions.assertNotNull(response.getPaylineStatus());
+//        Assertions.assertNotNull(response.getPaylinePaymentResponse());
     }
 
     @Test
@@ -108,76 +105,13 @@ class BeanTest {
 
     @ParameterizedTest
     @MethodSource("subStateSet")
-    void getFullStateTest(String subState, String expected){
-    PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(MockUtils.aCVCoResponse(Transaction.State.PAID, subState));
-        Assertions.assertEquals(expected,cvCoPaymentResponse.getTransaction().getFullState());
+    void getFullStateTest(String subState, String expected) {
+        PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(MockUtils.aCVCoResponse(Transaction.State.PAID, subState));
+        Assertions.assertEquals(expected, cvCoPaymentResponse.getTransaction().getFullState());
     }
 
 
     private static Stream<Arguments> statusSet() {
-        return Stream.of(
-                Arguments.of(Transaction.State.INITIALIZED, OnHoldTransactionStatus.class, null),
-                Arguments.of(Transaction.State.PROCESSING, OnHoldTransactionStatus.class, null),
-                Arguments.of(Transaction.State.AUTHORIZED, OnHoldTransactionStatus.class, null),
-                Arguments.of(Transaction.State.VALIDATED, OnHoldTransactionStatus.class, null),
-                Arguments.of(Transaction.State.CONSIGNED, OnHoldTransactionStatus.class, null),
-
-                Arguments.of(Transaction.State.CANCELLED, SuccessTransactionStatus.class, null),
-                Arguments.of(Transaction.State.PAID, SuccessTransactionStatus.class, null),
-                Arguments.of(Transaction.State.REJECTED, FailureTransactionStatus.class, FailureCause.REFUSED),
-                Arguments.of(Transaction.State.ABORTED, FailureTransactionStatus.class, FailureCause.CANCEL),
-                Arguments.of(Transaction.State.EXPIRED, FailureTransactionStatus.class, FailureCause.SESSION_EXPIRED)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("statusSet")
-    void PaymentResponsePaylineStatusTest(Transaction.State status, Class expectedStatusClass, FailureCause expectedCause) {
-        String json = MockUtils.aCVCoResponse(status);
-        PaymentResponse response = PaymentResponse.fromJson(json);
-
-        Assertions.assertNotNull(response);
-        TransactionStatus transactionStatus = response.getPaylineStatus();
-        Assertions.assertEquals(expectedStatusClass, transactionStatus.getClass());
-        if (expectedStatusClass.equals(FailureTransactionStatus.class)) {
-            FailureTransactionStatus failureStatus = (FailureTransactionStatus) transactionStatus;
-            Assertions.assertEquals(expectedCause, failureStatus.getFailureCause());
-        }
-    }
-
-    private static Stream<Arguments> statusSet2() {
-        return Stream.of(
-                Arguments.of(Transaction.State.INITIALIZED, PaymentResponseOnHold.class, null),
-                Arguments.of(Transaction.State.PROCESSING, PaymentResponseOnHold.class, null),
-                Arguments.of(Transaction.State.AUTHORIZED, PaymentResponseOnHold.class, null),
-                Arguments.of(Transaction.State.VALIDATED, PaymentResponseOnHold.class, null),
-                Arguments.of(Transaction.State.CONSIGNED, PaymentResponseOnHold.class, null),
-
-                Arguments.of(Transaction.State.CANCELLED, PaymentResponseSuccess.class, null),
-                Arguments.of(Transaction.State.PAID, PaymentResponseSuccess.class, null),
-                Arguments.of(Transaction.State.REJECTED, PaymentResponseFailure.class, FailureCause.REFUSED),
-                Arguments.of(Transaction.State.ABORTED, PaymentResponseFailure.class, FailureCause.CANCEL),
-                Arguments.of(Transaction.State.EXPIRED, PaymentResponseFailure.class, FailureCause.SESSION_EXPIRED)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("statusSet2")
-    void PaymentResponsePaylinePaymentResponseTest(Transaction.State status, Class expectedStatusClass, FailureCause expectedCause) {
-        String json = MockUtils.aCVCoResponse(status);
-        PaymentResponse response = PaymentResponse.fromJson(json);
-
-        Assertions.assertNotNull(response);
-        com.payline.pmapi.bean.payment.response.PaymentResponse paymentResponse = response.getPaylinePaymentResponse();
-        Assertions.assertEquals(expectedStatusClass, paymentResponse.getClass());
-        if (expectedStatusClass.equals(PaymentResponseFailure.class)) {
-            PaymentResponseFailure responseFailure = (PaymentResponseFailure) paymentResponse;
-            Assertions.assertEquals(expectedCause, responseFailure.getFailureCause());
-        }
-    }
-
-
-    private static Stream<Arguments> statusSet3() {
         return Stream.of(
                 Arguments.of("BAD_REQUEST", FailureCause.INVALID_DATA),
                 Arguments.of("INVALID_SEAL", FailureCause.INVALID_DATA),
@@ -195,7 +129,7 @@ class BeanTest {
     }
 
     @ParameterizedTest
-    @MethodSource("statusSet3")
+    @MethodSource("statusSet")
     void PaymentResponseFailureCause(String errorCode, FailureCause expectedFailureCause) {
         String json = MockUtils.anErrorCVCoResponse(errorCode);
         PaymentResponse response = PaymentResponse.fromJson(json);
