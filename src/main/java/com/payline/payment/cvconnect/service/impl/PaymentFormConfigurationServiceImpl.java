@@ -43,11 +43,11 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                 .aPaymentFormFieldText()
                 .withFieldIcon(FieldIcon.USER)
                 .withKey(Constants.PaymentFormKeys.CVCO_ID_KEY)
-                .withLabel(CVCO_ID_LABEL)
+                .withLabel(i18n.getMessage(CVCO_ID_LABEL, locale))
                 .withInputType(InputType.TEXT)
                 .withValidation(PATTERN)
-                .withValidationErrorMessage(CVCO_ID_VALIDATION_ERROR)
-                .withPlaceholder(CVCO_ID_PLACEHOLDER)
+                .withValidationErrorMessage(i18n.getMessage(CVCO_ID_VALIDATION_ERROR, locale))
+                .withPlaceholder(i18n.getMessage(CVCO_ID_PLACEHOLDER, locale))
                 .build();
         paymentFormFields.add(field);
 
