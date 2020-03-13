@@ -43,6 +43,8 @@ public class MockUtils {
         partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.SERVICE_PROVIDER_ID, "100016");
         partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.SEAL_KEY, "663768ff68ad8ea6768bbf65163e9b0a");
         partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.SEAL_KEY_VERSION, "ver001");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.CONNECT_TIMEOUT , "5000");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.READ_TIMEOUT , "1000");
 
         Map<String, String> sensitiveConfigurationMap = new HashMap<>();
         return new PartnerConfiguration(partnerConfigurationMap, sensitiveConfigurationMap);

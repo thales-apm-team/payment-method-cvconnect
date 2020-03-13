@@ -8,7 +8,6 @@ import com.payline.payment.cvconnect.exception.InvalidDataException;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.Constants;
 import com.payline.payment.cvconnect.utils.PluginUtils;
-import com.payline.payment.cvconnect.utils.properties.ConfigProperties;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
@@ -31,7 +30,6 @@ import java.nio.charset.StandardCharsets;
 
 
 public class HttpClient {
-
     private static final Logger LOGGER = LogManager.getLogger(HttpClient.class);
 
     //Headers
@@ -47,11 +45,6 @@ public class HttpClient {
     // Exceptions messages
     private static final String SERVICE_URL_ERROR = "Service URL is invalid";
 
-    /**
-     * The number of time the client must retry to send the request if it doesn't obtain a response.
-     */
-    private int retries;
-
     private org.apache.http.client.HttpClient client;
 
     // --- Singleton Holder pattern + initialization BEGIN
@@ -60,35 +53,11 @@ public class HttpClient {
      * ------------------------------------------------------------------------------------------------------------------
      */
     private HttpClient() {
-        int connectionRequestTimeout;
-        int connectTimeout;
-        int socketTimeout;
-        try {
-            // request config timeouts (in seconds)
-            ConfigProperties config = ConfigProperties.getInstance();
-            connectionRequestTimeout = Integer.parseInt(config.get("http.connectionRequestTimeout"));
-            connectTimeout = Integer.parseInt(config.get("http.connectTimeout"));
-            socketTimeout = Integer.parseInt(config.get("http.socketTimeout"));
-
-            // retries
-            this.retries = Integer.parseInt(config.get("http.retries"));
-        } catch (NumberFormatException e) {
-            throw new PluginException("plugin error: http.* properties must be integers", e);
-        }
-
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(connectionRequestTimeout * 1000)
-                .setConnectTimeout(connectTimeout * 1000)
-                .setSocketTimeout(socketTimeout * 1000)
-                .build();
-
         // instantiate Apache HTTP client
         this.client = HttpClientBuilder.create()
                 .useSystemProperties()
-                .setDefaultRequestConfig(requestConfig)
                 .setSSLSocketFactory(new SSLConnectionSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory(), SSLConnectionSocketFactory.getDefaultHostnameVerifier()))
                 .build();
-
     }
 
     /**
@@ -134,7 +103,9 @@ public class HttpClient {
         StringResponse strResponse = null;
         int attempts = 1;
 
-        while (strResponse == null && attempts <= this.retries) {
+//          The number of time the client must retry to send the request if it doesn't obtain a response.
+        int retries = 3;
+        while (strResponse == null && attempts <= retries) {
             LOGGER.info("Start call to partner API [{} {}] (attempt {})", httpRequest.getMethod(), httpRequest.getURI(), attempts);
             try (CloseableHttpResponse httpResponse = (CloseableHttpResponse) this.client.execute(httpRequest)) {
                 strResponse = StringResponse.fromHttpResponse(httpResponse);
@@ -157,12 +128,14 @@ public class HttpClient {
     /**
      * Manage GET API call
      *
-     * @param url
-     * @param path
-     * @param headers
+     * @param configuration Contain variables needed to construct the request (url, timeOut etc...)
+     * @param path The path to call
+     * @param headers Headers of the http request
      * @return
      */
-    StringResponse get(String url, String path, Header[] headers) {
+    StringResponse get(RequestConfiguration configuration, String path, Header[] headers) {
+        String url = configuration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.URL);
+
         URI uri;
         try {
             // Add the createOrderId to the url
@@ -181,13 +154,14 @@ public class HttpClient {
     /**
      * Manage Post API call
      *
-     * @param url
-     * @param path
-     * @param headers
-     * @param body
+     * @param configuration Contain variables needed to construct the request (url, timeOut etc...)
+     * @param path The path to call
+     * @param headers Headers of the http request
+     * @param body The body of the request
      * @return
      */
-    StringResponse post(String url, String path, Header[] headers, StringEntity body) {
+    StringResponse post(RequestConfiguration configuration, String path, Header[] headers, StringEntity body) {
+        String url = configuration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.URL);
         URI uri;
         try {
             // Add the createOrderId to the url
@@ -200,6 +174,19 @@ public class HttpClient {
         httpPost.setHeaders(headers);
         httpPost.setEntity(body);
 
+        // Timeout
+        final String readTimeout = configuration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.READ_TIMEOUT);
+        final String connectTimeout = configuration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.CONNECT_TIMEOUT);
+
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(Integer.valueOf(connectTimeout))
+                .setSocketTimeout(Integer.valueOf(readTimeout))
+                .build();
+
+        httpPost.setConfig(requestConfig);
+
+
         // Execute request
         return this.execute(httpPost);
     }
@@ -210,12 +197,11 @@ public class HttpClient {
 
         // create all data needed to do the call
         String body = request.toString();
-        String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.URL);
         String path = createPath(BASE_PATH);
         Header[] headers = createHeaders(requestConfiguration, request);
 
         // do the http call
-        StringResponse response = post(url, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
+        StringResponse response = post(requestConfiguration, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
         return PaymentResponse.fromJson(response.getContent());
     }
 
@@ -225,12 +211,11 @@ public class HttpClient {
 
         // create all data needed to do the call
         String body = request.toString();
-        String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.URL);
         String path = createPath(BASE_PATH, request.getId(), CONFIRM_TRANSACTION_PATH);
         Header[] headers = createHeaders(requestConfiguration, request);
 
         // do the http call
-        StringResponse response = post(url, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
+        StringResponse response = post(requestConfiguration, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
         return PaymentResponse.fromJson(response.getContent());
     }
 
@@ -238,24 +223,22 @@ public class HttpClient {
     public PaymentResponse cancelTransaction(RequestConfiguration requestConfiguration, CancelRequest request) {
         // create all data needed to do the call
         String body = request.toString();
-        String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.URL);
         String path = createPath(BASE_PATH, request.getId(), CANCELLATION_PATH);
         Header[] headers = createHeaders(requestConfiguration, request);
 
         // do the http call
-        StringResponse response = post(url, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
+        StringResponse response = post(requestConfiguration, path, headers, new StringEntity(body, StandardCharsets.UTF_8));
         return PaymentResponse.fromJson(response.getContent());
     }
 
     // get transaction status GET request
     public PaymentResponse getTransactionStatus(RequestConfiguration requestConfiguration, GetTransactionStatusRequest request) {
         // create all data needed to do the call
-        String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.URL);
         String path = createPath(BASE_PATH, request.getId());
         Header[] headers = createHeaders(requestConfiguration, request);
 
         // do the http call
-        StringResponse response = get(url, path, headers);
+        StringResponse response = get(requestConfiguration, path, headers);
         return PaymentResponse.fromJson(response.getContent());
     }
 }
