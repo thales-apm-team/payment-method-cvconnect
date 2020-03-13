@@ -103,7 +103,7 @@ class HttpClientTest {
                 , MockUtils.anEnvironment()
                 , MockUtils.aPartnerConfiguration()
         );
-        CancelRequest request = new CancelRequest(MockUtils.aPaylineResetRequest());
+        CancelRequest request = new CancelRequest(MockUtils.aPaylineRefundRequest());
 
         // create Mock
         StringResponse stringResponse = MockUtils.mockStringResponse(

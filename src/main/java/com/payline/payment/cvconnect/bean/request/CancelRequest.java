@@ -1,7 +1,7 @@
 package com.payline.payment.cvconnect.bean.request;
 
 import com.google.gson.annotations.Expose;
-import com.payline.pmapi.bean.reset.request.ResetRequest;
+import com.payline.pmapi.bean.refund.request.RefundRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ public class CancelRequest extends Request {
     private String reason;
 
 
-    public CancelRequest(ResetRequest request) {
+    public CancelRequest(RefundRequest request) {
         this.id = request.getPartnerTransactionId();
         this.reason = "OTHER";
     }

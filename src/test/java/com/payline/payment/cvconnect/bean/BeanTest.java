@@ -10,7 +10,7 @@ import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
-import com.payline.pmapi.bean.reset.request.ResetRequest;
+import com.payline.pmapi.bean.refund.request.RefundRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -65,9 +65,9 @@ class BeanTest {
 
     @Test
     void cancelRequestTest() {
-        ResetRequest resetRequest = MockUtils.aPaylineResetRequest();
+        RefundRequest refundRequest = MockUtils.aPaylineRefundRequest();
 
-        CancelRequest request = new CancelRequest(resetRequest);
+        CancelRequest request = new CancelRequest(refundRequest);
         Assertions.assertNotNull(request.getId());
         Assertions.assertNotNull(request.getReason());
         Assertions.assertNotNull(request.getANCVSecurity());
@@ -95,7 +95,7 @@ class BeanTest {
     }
 
 
-    private static Stream<Arguments> subStateSet() {
+    private static Stream<Arguments> subStatefund() {
         return Stream.of(
                 Arguments.of("foo", "PAID.foo"),
                 Arguments.of("", "PAID"),
@@ -104,7 +104,7 @@ class BeanTest {
     }
 
     @ParameterizedTest
-    @MethodSource("subStateSet")
+    @MethodSource("subStatefund")
     void getFullStateTest(String subState, String expected) {
         PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(MockUtils.aCVCoResponse(Transaction.State.PAID, subState));
         Assertions.assertEquals(expected, cvCoPaymentResponse.getTransaction().getFullState());

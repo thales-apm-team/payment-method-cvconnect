@@ -6,10 +6,10 @@ import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.pmapi.bean.common.FailureCause;
-import com.payline.pmapi.bean.reset.request.ResetRequest;
-import com.payline.pmapi.bean.reset.response.ResetResponse;
-import com.payline.pmapi.bean.reset.response.impl.ResetResponseFailure;
-import com.payline.pmapi.bean.reset.response.impl.ResetResponseSuccess;
+import com.payline.pmapi.bean.refund.request.RefundRequest;
+import com.payline.pmapi.bean.refund.response.RefundResponse;
+import com.payline.pmapi.bean.refund.response.impl.RefundResponseFailure;
+import com.payline.pmapi.bean.refund.response.impl.RefundResponseSuccess;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,9 +18,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-class ResetServiceImplTest {
+class RefundServiceImplTest {
     @InjectMocks
-    private ResetServiceImpl service = new ResetServiceImpl();
+    private RefundServiceImpl service = new RefundServiceImpl();
 
     @Mock
     private HttpClient client;
@@ -31,8 +31,8 @@ class ResetServiceImplTest {
     }
 
     @Test
-    void resetRequest() {
-        ResetRequest request = MockUtils.aPaylineResetRequest();
+    void refundRequest() {
+        RefundRequest request = MockUtils.aPaylineRefundRequest();
 
         String json = MockUtils.aCVCoResponse(Transaction.State.CANCELLED);
         PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json);
@@ -40,15 +40,15 @@ class ResetServiceImplTest {
         // create mock
         Mockito.doReturn(cvCoPaymentResponse).when(client).cancelTransaction(Mockito.any(), Mockito.any());
 
-        ResetResponse response = service.resetRequest(request);
+        RefundResponse response = service.refundRequest(request);
 
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(ResetResponseSuccess.class, response.getClass());
+        Assertions.assertEquals(RefundResponseSuccess.class, response.getClass());
     }
 
     @Test
-    void resetRequestErrorResponse() {
-        ResetRequest request = MockUtils.aPaylineResetRequest();
+    void refundRequestErrorResponse() {
+        RefundRequest request = MockUtils.aPaylineRefundRequest();
 
         String json = MockUtils.anErrorCVCoResponse("foo");
         PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json);
@@ -56,15 +56,15 @@ class ResetServiceImplTest {
         // create mock
         Mockito.doReturn(cvCoPaymentResponse).when(client).cancelTransaction(Mockito.any(), Mockito.any());
 
-        ResetResponse response = service.resetRequest(request);
+        RefundResponse response = service.refundRequest(request);
 
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(ResetResponseFailure.class, response.getClass());
+        Assertions.assertEquals(RefundResponseFailure.class, response.getClass());
     }
 
     @Test
-    void resetRequestWrongStatus() {
-        ResetRequest request = MockUtils.aPaylineResetRequest();
+    void refundRequestWrongStatus() {
+        RefundRequest request = MockUtils.aPaylineRefundRequest();
 
         String json = MockUtils.aCVCoResponse(Transaction.State.ABORTED);
         PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json);
@@ -72,34 +72,34 @@ class ResetServiceImplTest {
         // create mock
         Mockito.doReturn(cvCoPaymentResponse).when(client).cancelTransaction(Mockito.any(), Mockito.any());
 
-        ResetResponse response = service.resetRequest(request);
+        RefundResponse response = service.refundRequest(request);
 
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(ResetResponseFailure.class, response.getClass());
+        Assertions.assertEquals(RefundResponseFailure.class, response.getClass());
     }
 
     @Test
-    void resetRequestPluginException() {
-        ResetRequest request = MockUtils.aPaylineResetRequest();
+    void refundRequestPluginException() {
+        RefundRequest request = MockUtils.aPaylineRefundRequest();
         PluginException e = new PluginException("foo", FailureCause.INVALID_DATA);
         Mockito.doThrow(e).when(client).cancelTransaction(Mockito.any(), Mockito.any());
 
-        ResetResponse response = service.resetRequest(request);
+        RefundResponse response = service.refundRequest(request);
 
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(ResetResponseFailure.class, response.getClass());
+        Assertions.assertEquals(RefundResponseFailure.class, response.getClass());
     }
 
     @Test
-    void resetRequestRuntimeException() {
-        ResetRequest request = MockUtils.aPaylineResetRequest();
+    void refundRequestRuntimeException() {
+        RefundRequest request = MockUtils.aPaylineRefundRequest();
         RuntimeException e = new RuntimeException("foo");
         Mockito.doThrow(e).when(client).cancelTransaction(Mockito.any(), Mockito.any());
 
-        ResetResponse response = service.resetRequest(request);
+        RefundResponse response = service.refundRequest(request);
 
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(ResetResponseFailure.class, response.getClass());
+        Assertions.assertEquals(RefundResponseFailure.class, response.getClass());
     }
 
     @Test

@@ -7,34 +7,34 @@ import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.pmapi.bean.common.FailureCause;
-import com.payline.pmapi.bean.reset.request.ResetRequest;
-import com.payline.pmapi.bean.reset.response.ResetResponse;
-import com.payline.pmapi.bean.reset.response.impl.ResetResponseFailure;
-import com.payline.pmapi.bean.reset.response.impl.ResetResponseSuccess;
+import com.payline.pmapi.bean.refund.request.RefundRequest;
+import com.payline.pmapi.bean.refund.response.RefundResponse;
+import com.payline.pmapi.bean.refund.response.impl.RefundResponseFailure;
+import com.payline.pmapi.bean.refund.response.impl.RefundResponseSuccess;
 import com.payline.pmapi.logger.LogManager;
-import com.payline.pmapi.service.ResetService;
+import com.payline.pmapi.service.RefundService;
 import org.apache.logging.log4j.Logger;
 
-public class ResetServiceImpl implements ResetService {
+public class RefundServiceImpl implements RefundService {
     private static final Logger LOGGER = LogManager.getLogger(PaymentServiceImpl.class);
     private HttpClient client = HttpClient.getInstance();
 
     @Override
-    public ResetResponse resetRequest(ResetRequest resetRequest) {
-        String partnerTransactionId = resetRequest.getPartnerTransactionId();
+    public RefundResponse refundRequest(RefundRequest refundRequest) {
+        String partnerTransactionId = refundRequest.getPartnerTransactionId();
         try {
-            CancelRequest cancelRequest = new CancelRequest(resetRequest);
+            CancelRequest cancelRequest = new CancelRequest(refundRequest);
             RequestConfiguration configuration = new RequestConfiguration(
-                    resetRequest.getContractConfiguration()
-                    , resetRequest.getEnvironment()
-                    , resetRequest.getPartnerConfiguration()
+                    refundRequest.getContractConfiguration()
+                    , refundRequest.getEnvironment()
+                    , refundRequest.getPartnerConfiguration()
             );
             PaymentResponse response = client.cancelTransaction(configuration, cancelRequest);
 
             if (!response.isOk()) {
                 // return a failure
-                return ResetResponseFailure.ResetResponseFailureBuilder
-                        .aResetResponseFailure()
+                return RefundResponseFailure.RefundResponseFailureBuilder
+                        .aRefundResponseFailure()
                         .withErrorCode(response.getErrorCode())
                         .withFailureCause(response.getFailureCause())
                         .withPartnerTransactionId(partnerTransactionId)
@@ -45,8 +45,8 @@ public class ResetServiceImpl implements ResetService {
                 // return a failure
                 String errorMessage = "Invalid transaction State";
                 LOGGER.info(errorMessage);
-                return ResetResponseFailure.ResetResponseFailureBuilder
-                        .aResetResponseFailure()
+                return RefundResponseFailure.RefundResponseFailureBuilder
+                        .aRefundResponseFailure()
                         .withErrorCode(errorMessage)
                         .withFailureCause(FailureCause.INVALID_DATA)
                         .withPartnerTransactionId(partnerTransactionId)
@@ -54,22 +54,22 @@ public class ResetServiceImpl implements ResetService {
             }
 
             // return a success
-            return ResetResponseSuccess.ResetResponseSuccessBuilder
-                    .aResetResponseSuccess()
+            return RefundResponseSuccess.RefundResponseSuccessBuilder
+                    .aRefundResponseSuccess()
                     .withPartnerTransactionId(partnerTransactionId)
                     .withStatusCode(response.getTransaction().getFullState())
                     .build();
         } catch (PluginException e) {
-            return ResetResponseFailure.ResetResponseFailureBuilder
-                    .aResetResponseFailure()
+            return RefundResponseFailure.RefundResponseFailureBuilder
+                    .aRefundResponseFailure()
                     .withErrorCode(e.getErrorCode())
                     .withFailureCause(e.getFailureCause())
-                    .withPartnerTransactionId(resetRequest.getPartnerTransactionId())
+                    .withPartnerTransactionId(refundRequest.getPartnerTransactionId())
                     .build();
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
-            return ResetResponseFailure.ResetResponseFailureBuilder
-                    .aResetResponseFailure()
+            return RefundResponseFailure.RefundResponseFailureBuilder
+                    .aRefundResponseFailure()
                     .withErrorCode(PluginException.runtimeErrorCode(e))
                     .withFailureCause(FailureCause.INTERNAL_ERROR)
                     .withPartnerTransactionId(partnerTransactionId)
