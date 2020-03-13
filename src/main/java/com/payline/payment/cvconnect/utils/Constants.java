@@ -25,6 +25,8 @@ public class Constants {
         public static final String SERVICE_PROVIDER_ID = "serviceProviderId";
         public static final String SEAL_KEY = "sealKey";
         public static final String SEAL_KEY_VERSION = "sealKeyVersion";
+        public static final String READ_TIMEOUT = "readTimeOut";
+        public static final String CONNECT_TIMEOUT = "connectTimeOut";
 
 
         /* Static utility class : no need to instantiate it (Sonar bug fix) */

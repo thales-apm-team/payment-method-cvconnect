@@ -38,7 +38,7 @@ class PaymentServiceImplTest {
         PaymentResponse createResponse = PaymentResponse.fromJson(MockUtils.aCVCoResponse(Transaction.State.INITIALIZED));
         Mockito.doReturn(createResponse).when(client).createTransaction(Mockito.any(), Mockito.any());
 
-        PaymentResponse confirmResponse = PaymentResponse.fromJson(MockUtils.aCVCoResponse("foo"));
+        PaymentResponse confirmResponse = PaymentResponse.fromJson(MockUtils.aCVCoResponse(Transaction.State.AUTHORIZED));
         Mockito.doReturn(confirmResponse).when(client).confirmTransaction(Mockito.any(), Mockito.any());
 
         PaymentRequest request = MockUtils.aPaylinePaymentRequest();
@@ -49,7 +49,7 @@ class PaymentServiceImplTest {
     @Test
     void paymentRequestErrorCreateResponse() {
         // create Mock
-        PaymentResponse createResponse = PaymentResponse.fromJson(MockUtils.aCVCoResponse("foo"));
+        PaymentResponse createResponse = PaymentResponse.fromJson(MockUtils.aCVCoResponse(Transaction.State.AUTHORIZED));
         Mockito.doReturn(createResponse).when(client).createTransaction(Mockito.any(), Mockito.any());
 
 
@@ -62,7 +62,7 @@ class PaymentServiceImplTest {
     @Test
     void paymentRequestInvalidCreateResponse() {
         // create Mock
-        PaymentResponse createResponse = PaymentResponse.fromJson(MockUtils.anErrorCVCoResponse(Transaction.State.ABORTED));
+        PaymentResponse createResponse = PaymentResponse.fromJson(MockUtils.anErrorCVCoResponse("ABORTED"));
         Mockito.doReturn(createResponse).when(client).createTransaction(Mockito.any(), Mockito.any());
 
         PaymentRequest request = MockUtils.aPaylinePaymentRequest();

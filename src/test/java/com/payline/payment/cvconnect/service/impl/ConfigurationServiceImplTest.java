@@ -2,6 +2,7 @@ package com.payline.payment.cvconnect.service.impl;
 
 
 import com.payline.payment.cvconnect.MockUtils;
+import com.payline.payment.cvconnect.bean.common.Transaction;
 import com.payline.payment.cvconnect.bean.response.PaymentResponse;
 import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.payment.cvconnect.utils.properties.ReleaseProperties;
@@ -46,7 +47,7 @@ class ConfigurationServiceImplTest {
 
     @Test
     void check() {
-        String json = MockUtils.aCVCoResponse("foo");
+        String json = MockUtils.aCVCoResponse(Transaction.State.AUTHORIZED);
         PaymentResponse cvCoPaymentResponse = PaymentResponse.fromJson(json);
         Mockito.doReturn(cvCoPaymentResponse).when(client).createTransaction(Mockito.any(), Mockito.any());
 

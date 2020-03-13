@@ -42,8 +42,10 @@ public class PluginUtils {
     }
 
     /**
-     * @param fields
-     * @return
+     * Encode in Base64 a list of field joined by a "." and hash it
+     *
+     * @param fields the list of field to convert
+     * @return the hashed String
      */
     public static String getSealHeader(RequestConfiguration configuration, List<String> fields) {
         String sealKey = configuration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.SEAL_KEY);
@@ -60,6 +62,17 @@ public class PluginUtils {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new InvalidDataException(e.getMessage());
         }
+    }
+
+
+    /**
+     * Check if a String is null or empty
+     *
+     * @param value the String to check
+     * @return True if the String is null or empty
+     */
+    public static boolean isEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 
 }

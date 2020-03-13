@@ -1,5 +1,6 @@
 package com.payline.payment.cvconnect;
 
+import com.payline.payment.cvconnect.bean.common.Transaction;
 import com.payline.payment.cvconnect.utils.Constants;
 import com.payline.payment.cvconnect.utils.http.StringResponse;
 import com.payline.pmapi.bean.common.Buyer;
@@ -42,6 +43,8 @@ public class MockUtils {
         partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.SERVICE_PROVIDER_ID, "100016");
         partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.SEAL_KEY, "663768ff68ad8ea6768bbf65163e9b0a");
         partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.SEAL_KEY_VERSION, "ver001");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.CONNECT_TIMEOUT , "5000");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.READ_TIMEOUT , "1000");
 
         Map<String, String> sensitiveConfigurationMap = new HashMap<>();
         return new PartnerConfiguration(partnerConfigurationMap, sensitiveConfigurationMap);
@@ -283,41 +286,50 @@ public class MockUtils {
     /**
      * ------------------------------------------------------------------------------------------------------------------
      */
+    public static String aCVCoResponse(Transaction.State state) {
+        return aCVCoResponse(state, "foo");
+    }
 
-    public static String aCVCoResponse(String status) {
-        return "{" +
+    public static String aCVCoResponse(Transaction.State state, String subState) {
+        String s = "{" +
                 "    \"responseDate\": \"2019-11-29T14:13:56.83+01:00\"," +
                 "    \"applicationContext\": {}," +
                 "    \"transaction\": {" +
                 "        \"id\": \"fiawa31zot\"," +
-                "        \"state\": \"" + status + "\"," +
-                "        \"creationDate\": \"2019-11-29T14:13:56.83+01:00\"," +
+                "        \"state\": \"" + state + "\",";
+
+        if (subState != null) s += "        \"subState\": \"" + subState + "\",";
+
+        s += "        \"creationDate\": \"2019-11-29T14:13:56.83+01:00\"," +
                 "        \"updateDate\": \"2019-11-29T14:13:56.83+01:00\"," +
                 "        \"expirationDate\": \"2019-11-29T14:18:56.829+01:00\"," +
-                "        \"merchant\": {" +
-                "            \"shopId\": 10000651," +
-                "            \"serviceProviderId\": 100016" +
-                "        }," +
+                "        \"merchant\": { \"shopId\": 10000651, \"serviceProviderId\": 100016 }," +
                 "        \"order\": {" +
                 "            \"id\": \"ref-20191105153749\"," +
                 "            \"paymentId\": \"123456789012345678901\"," +
                 "            \"label\": \"softDescriptor\"," +
-                "            \"amount\": {" +
-                "                \"total\": 2000," +
-                "                \"currency\": \"978\"" +
-                "            }" +
+                "            \"amount\": { \"total\": 2000, \"currency\": \"978\" }" +
                 "        }," +
-                "        \"paymentMethod\": {" +
-                "            \"tspdMode\": \"001\"," +
-                "            \"captureMode\": \"NORMAL\"," +
-                "            \"captureDate\": \"2019-11-29T14:13:56.827+01:00\"" +
-                "        }," +
-                "        \"redirectUrls\": {" +
-                "            \"returnUrl\": \"http://redirectionURL.com\"," +
-                "            \"cancelUrl\": \"http://redirectionCancelURL.com\"" +
-                "        }" +
+                "        \"paymentMethod\": { \"tspdMode\": \"001\", \"captureMode\": \"NORMAL\", \"captureDate\": \"2019-11-29T14:13:56.827+01:00\" }," +
+                "        \"redirectUrls\": { \"returnUrl\": \"http://url.com\", \"cancelUrl\": \"http://url2.com\" }," +
+                "\"payers\": [" +
+                "      {" +
+                "        \"beneficiaryId\": \"ntrupond71@yopmail.com\"," +
+                "        \"amount\": { \"total\": 4000, \"currency\": \"978\" }," +
+                "        \"authorizations\": [" +
+                "          {" +
+                "            \"number\": \"flff6j6r3a\"," +
+                "            \"type\": \"CVCo\"," +
+                "            \"amount\": { \"total\": 2000, \"currency\": \"978\" }," +
+                "            \"validationDate\": \"2020-03-10T15:39:14.251+01:00\"," +
+                "            \"holder\": \"10*****3051\"" +
+                "          }" +
+                "        ]" +
+                "      }" +
+                "    ]" +
                 "    }" +
                 "}";
+        return s;
     }
 
     public static String anErrorCVCoResponse(String errorCode) {

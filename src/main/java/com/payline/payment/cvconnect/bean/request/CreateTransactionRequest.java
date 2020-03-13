@@ -53,8 +53,8 @@ public class CreateTransactionRequest extends Request {
                 , request.isCaptureNow() ? null : request.getDifferedActionDate()
         );
         this.redirectUrls = new RedirectUrls(
-                request.getEnvironment().getRedirectionReturnURL()
-                , request.getEnvironment().getRedirectionCancelURL()
+                request.getEnvironment().getNotificationURL()
+                , request.getEnvironment().getNotificationURL()
         );
     }
 
