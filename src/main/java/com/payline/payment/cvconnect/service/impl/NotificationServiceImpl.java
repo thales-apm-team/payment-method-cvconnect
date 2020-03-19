@@ -31,7 +31,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationResponse parse(NotificationRequest request) {
         NotificationResponse notificationResponse;
-        String transactionId = request.getTransactionId();
         String partnerTransactionId = "UNKNOWN";
         try {
             // init data
@@ -48,14 +47,23 @@ public class NotificationServiceImpl implements NotificationService {
             GetTransactionStatusRequest getTransactionStatusRequest = new GetTransactionStatusRequest(partnerTransactionId);
             com.payline.payment.cvconnect.bean.response.PaymentResponse response = client.getTransactionStatus(configuration, getTransactionStatusRequest);
             Transaction transaction = response.getTransaction();
+            String transactionId = transaction.getOrder().getId();
+
+            TransactionCorrelationId correlationId = TransactionCorrelationId.TransactionCorrelationIdBuilder
+                    .aCorrelationIdBuilder()
+                    .withType(TransactionCorrelationId.CorrelationIdType.TRANSACTION_ID)
+                    .withValue(transactionId)
+                    .build();
+
             switch (transaction.getState()) {
 
                 case VALIDATED:
+                    // PaymentResponseByNotificationResponse => Success
                     Amount reservedAmount = new Amount(
                             transaction.getPayer().getFirstAuthorization().getAmount().getTotal()
-                            , PluginUtils.getCurrencyFromCode(transaction.getPayer().getFirstAuthorization().getAmount().getCurrency() )
+                            , PluginUtils.getCurrencyFromCode(transaction.getPayer().getFirstAuthorization().getAmount().getCurrency())
                     );
-                    // PaymentResponseByNotificationResponse => Success
+
                     PaymentResponse paymentResponse = PaymentResponseSuccess.PaymentResponseSuccessBuilder
                             .aPaymentResponseSuccess()
                             .withPartnerTransactionId(partnerTransactionId)
@@ -64,9 +72,8 @@ public class NotificationServiceImpl implements NotificationService {
                             .withTransactionDetails(Email.EmailBuilder.anEmail().withEmail(transaction.getPayer().getBeneficiaryId()).build())
                             .build();
 
-                    notificationResponse = createPaymentResponseByNotification(transactionId, paymentResponse);
+                    notificationResponse = createPaymentResponseByNotification(correlationId, paymentResponse);
                     break;
-
                 case ABORTED:
                     // PaymentResponseByNotificationResponse => Failure
                     paymentResponse = PaymentResponseFailure.PaymentResponseFailureBuilder
@@ -77,7 +84,7 @@ public class NotificationServiceImpl implements NotificationService {
                             .withTransactionDetails(new EmptyTransactionDetails())
                             .build();
 
-                    notificationResponse = createPaymentResponseByNotification(transactionId, paymentResponse);
+                    notificationResponse = createPaymentResponseByNotification(correlationId, paymentResponse);
                     break;
                 case EXPIRED:
                     // PaymentResponseByNotificationResponse => Failure
@@ -89,7 +96,7 @@ public class NotificationServiceImpl implements NotificationService {
                             .withTransactionDetails(new EmptyTransactionDetails())
                             .build();
 
-                    notificationResponse = createPaymentResponseByNotification(transactionId, paymentResponse);
+                    notificationResponse = createPaymentResponseByNotification(correlationId, paymentResponse);
                     break;
 
                 // TransactionStateChangedResponse
@@ -116,30 +123,34 @@ public class NotificationServiceImpl implements NotificationService {
             }
 
         } catch (PluginException e) {
-            TransactionStatus failureStatus = FailureTransactionStatus.builder()
-                    .failureCause(e.getFailureCause())
+            TransactionCorrelationId correlationId = TransactionCorrelationId.TransactionCorrelationIdBuilder
+                    .aCorrelationIdBuilder()
+                    .withType(TransactionCorrelationId.CorrelationIdType.PARTNER_TRANSACTION_ID)
+                    .withValue(partnerTransactionId)
                     .build();
 
-            notificationResponse = TransactionStateChangedResponse.TransactionStateChangedResponseBuilder
-                    .aTransactionStateChangedResponse()
+            PaymentResponse failureResponse = e.toPaymentResponseFailureBuilder()
                     .withPartnerTransactionId(partnerTransactionId)
-                    .withTransactionId(transactionId)
-                    .withTransactionStatus(failureStatus)
-                    .withStatusDate(new Date())
                     .build();
+
+            notificationResponse = createPaymentResponseByNotification(correlationId, failureResponse);
 
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
-            TransactionStatus failureStatus = FailureTransactionStatus.builder()
-                    .failureCause(FailureCause.INTERNAL_ERROR)
+            TransactionCorrelationId correlationId = TransactionCorrelationId.TransactionCorrelationIdBuilder
+                    .aCorrelationIdBuilder()
+                    .withType(TransactionCorrelationId.CorrelationIdType.PARTNER_TRANSACTION_ID)
+                    .withValue(partnerTransactionId)
                     .build();
 
-            notificationResponse = TransactionStateChangedResponse.TransactionStateChangedResponseBuilder
-                    .aTransactionStateChangedResponse()
+            PaymentResponse failureResponse = PaymentResponseFailure.PaymentResponseFailureBuilder
+                    .aPaymentResponseFailure()
+                    .withErrorCode(PluginException.runtimeErrorCode(e))
+                    .withFailureCause(FailureCause.INTERNAL_ERROR)
                     .withPartnerTransactionId(partnerTransactionId)
-                    .withTransactionId(transactionId)
-                    .withTransactionStatus(failureStatus)
                     .build();
+
+            notificationResponse = createPaymentResponseByNotification(correlationId, failureResponse);
         }
 
         return notificationResponse;
@@ -151,13 +162,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
-    private PaymentResponseByNotificationResponse createPaymentResponseByNotification(String transactionId, PaymentResponse paymentResponse) {
-        TransactionCorrelationId correlationId = TransactionCorrelationId.TransactionCorrelationIdBuilder
-                .aCorrelationIdBuilder()
-                .withType(TransactionCorrelationId.CorrelationIdType.TRANSACTION_ID)
-                .withValue(transactionId)
-                .build();
-
+    private PaymentResponseByNotificationResponse createPaymentResponseByNotification(TransactionCorrelationId correlationId, PaymentResponse paymentResponse) {
         return PaymentResponseByNotificationResponse.PaymentResponseByNotificationResponseBuilder
                 .aPaymentResponseByNotificationResponseBuilder()
                 .withPaymentResponse(paymentResponse)
