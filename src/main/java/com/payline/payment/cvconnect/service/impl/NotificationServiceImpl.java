@@ -36,24 +36,8 @@ public class NotificationServiceImpl implements NotificationService {
             // init data
             String content = PluginUtils.inputStreamToString(request.getContent());
             com.payline.payment.cvconnect.bean.response.PaymentResponse notificationPaymentResponse = com.payline.payment.cvconnect.bean.response.PaymentResponse.fromJson(content);
-            partnerTransactionId = notificationPaymentResponse.getTransaction().getId();
-
-            RequestConfiguration configuration = new RequestConfiguration(
-                    request.getContractConfiguration()
-                    , request.getEnvironment()
-                    , request.getPartnerConfiguration());
-
-            // get final status
-            GetTransactionStatusRequest getTransactionStatusRequest = new GetTransactionStatusRequest(partnerTransactionId);
-            com.payline.payment.cvconnect.bean.response.PaymentResponse response = client.getTransactionStatus(configuration, getTransactionStatusRequest);
-            Transaction transaction = response.getTransaction();
-            String transactionId = transaction.getOrder().getId();
-
-            TransactionCorrelationId correlationId = TransactionCorrelationId.TransactionCorrelationIdBuilder
-                    .aCorrelationIdBuilder()
-                    .withType(TransactionCorrelationId.CorrelationIdType.TRANSACTION_ID)
-                    .withValue(transactionId)
-                    .build();
+            Transaction transaction = notificationPaymentResponse.getTransaction();
+            partnerTransactionId = transaction.getId();
 
             switch (transaction.getState()) {
 
