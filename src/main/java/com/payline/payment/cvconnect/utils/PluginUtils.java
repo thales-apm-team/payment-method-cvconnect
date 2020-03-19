@@ -13,7 +13,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PluginUtils {
@@ -75,4 +77,14 @@ public class PluginUtils {
         return value == null || value.isEmpty();
     }
 
+
+    /**
+     * find the Currency to create from an ISO 4217 numeric currency code
+     * @param code an ISO 4217 numeric currency code
+     * @return The right Currency
+     */
+    public static Currency getCurrencyFromCode(int code) {
+        Optional<Currency> currency = Currency.getAvailableCurrencies().stream().filter(c -> c.getNumericCode() == code).findAny();
+        return currency.get();
+    }
 }

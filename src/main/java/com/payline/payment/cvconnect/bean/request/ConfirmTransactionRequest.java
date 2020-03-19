@@ -16,7 +16,7 @@ public class ConfirmTransactionRequest extends Request {
 
     public ConfirmTransactionRequest(PaymentRequest request, String id) {
         Amount amount = new Amount(
-                request.getAmount().getAmountInSmallestUnit().toString()
+                request.getAmount().getAmountInSmallestUnit()
                 , request.getAmount().getCurrency().getNumericCode()
         );
 
@@ -41,7 +41,7 @@ public class ConfirmTransactionRequest extends Request {
         List<String> sealFields = new ArrayList<>();
         sealFields.add(this.id);
         sealFields.add(this.payer.getBeneficiaryId());
-        sealFields.add(this.payer.getAmount().getTotal());
+        sealFields.add(String.valueOf( this.payer.getAmount().getTotal()));
 
         return sealFields;
     }

@@ -3,10 +3,7 @@ package com.payline.payment.cvconnect.service.impl;
 import com.payline.payment.cvconnect.service.LogoPaymentFormConfigurationService;
 import com.payline.payment.cvconnect.utils.Constants;
 import com.payline.payment.cvconnect.utils.i18n.I18nService;
-import com.payline.pmapi.bean.paymentform.bean.field.FieldIcon;
-import com.payline.pmapi.bean.paymentform.bean.field.InputType;
-import com.payline.pmapi.bean.paymentform.bean.field.PaymentFormField;
-import com.payline.pmapi.bean.paymentform.bean.field.PaymentFormInputFieldText;
+import com.payline.pmapi.bean.paymentform.bean.field.*;
 import com.payline.pmapi.bean.paymentform.bean.form.CustomForm;
 import com.payline.pmapi.bean.paymentform.request.PaymentFormConfigurationRequest;
 import com.payline.pmapi.bean.paymentform.response.configuration.PaymentFormConfigurationResponse;
@@ -21,6 +18,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
     private static final String BUTTON_TEXT = "payment.form.config.button.text";
     private static final String BUTTON_DESCRIPTION = "payment.form.config.description";
 
+    private static final String CVCO_WARNING_LABEL = "payment.form.config.warning.label";
     private static final String CVCO_ID_LABEL = "payment.form.config.id.label";
     private static final String CVCO_ID_PLACEHOLDER = "payment.form.config.id.placeholder";
     private static final String CVCO_ID_VALIDATION_ERROR = "payment.form.config.validation.error";
@@ -38,6 +36,13 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
         Locale locale = paymentFormConfigurationRequest.getLocale();
 
         List<PaymentFormField> paymentFormFields = new ArrayList<>();
+
+        PaymentFormDisplayFieldText warningMessage = PaymentFormDisplayFieldText.PaymentFormDisplayFieldTextBuilder
+                .aPaymentFormDisplayFieldText()
+                .withContent(i18n.getMessage(CVCO_WARNING_LABEL, locale))
+                .build();
+
+        paymentFormFields.add(warningMessage);
 
         PaymentFormInputFieldText field = PaymentFormInputFieldText.PaymentFormFieldTextBuilder
                 .aPaymentFormFieldText()

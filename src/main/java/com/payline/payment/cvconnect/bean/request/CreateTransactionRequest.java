@@ -6,6 +6,7 @@ import com.payline.payment.cvconnect.utils.PluginUtils;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class CreateTransactionRequest extends Request {
                 , request.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.SERVICE_PROVIDER_ID)
         );
         this.order = new Order("01", "anId", "aLabel",
-                new Amount("2000", 978));
+                new Amount(BigInteger.valueOf(2000), 978));
 
         this.paymentMethod = new PaymentMethod("001", "NORMAL", null);
         this.redirectUrls = new RedirectUrls("anUrl", "anUrl");
@@ -42,7 +43,7 @@ public class CreateTransactionRequest extends Request {
                 , request.getTransactionId()
                 , request.getSoftDescriptor()
                 , new Amount(
-                request.getAmount().getAmountInSmallestUnit().toString()
+                request.getAmount().getAmountInSmallestUnit()
                 , request.getAmount().getCurrency().getNumericCode()
         )
         );
@@ -82,7 +83,7 @@ public class CreateTransactionRequest extends Request {
         sealFields.add(this.merchant.getServiceProviderId());
         sealFields.add(this.order.getId());
         sealFields.add(this.order.getPaymentId());
-        sealFields.add(this.order.getAmount().getTotal());
+        sealFields.add(String.valueOf(this.order.getAmount().getTotal()));
         return sealFields;
     }
 }

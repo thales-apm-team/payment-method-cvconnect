@@ -34,7 +34,7 @@ class NotificationServiceImplTest {
 
     private static Stream<Arguments> statusSet() {
         return Stream.of(
-                Arguments.of(VALIDATED, PaymentResponseByNotificationResponse.class),
+                Arguments.of(VALIDATED, TransactionStateChangedResponse.class),
                 Arguments.of(ABORTED, PaymentResponseByNotificationResponse.class),
                 Arguments.of(EXPIRED, PaymentResponseByNotificationResponse.class),
                 Arguments.of(CONSIGNED, TransactionStateChangedResponse.class),
@@ -43,7 +43,7 @@ class NotificationServiceImplTest {
                 Arguments.of(CANCELLED, TransactionStateChangedResponse.class),
                 Arguments.of(INITIALIZED, IgnoreNotificationResponse.class),
                 Arguments.of(PROCESSING, IgnoreNotificationResponse.class),
-                Arguments.of(AUTHORIZED, IgnoreNotificationResponse.class)
+                Arguments.of(AUTHORIZED, PaymentResponseByNotificationResponse.class)
         );
     }
 
