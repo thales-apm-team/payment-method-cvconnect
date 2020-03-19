@@ -1,8 +1,10 @@
 package com.payline.payment.cvconnect.service.impl;
 
 import com.payline.payment.cvconnect.bean.common.Transaction;
-import com.payline.payment.cvconnect.exception.PluginException;
+import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
+import com.payline.payment.cvconnect.bean.request.GetTransactionStatusRequest;
 import com.payline.payment.cvconnect.utils.PluginUtils;
+import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.pmapi.bean.common.*;
 import com.payline.pmapi.bean.notification.request.NotificationRequest;
 import com.payline.pmapi.bean.notification.response.NotificationResponse;
@@ -23,6 +25,7 @@ import java.util.Date;
 
 public class NotificationServiceImpl implements NotificationService {
     private static final Logger LOGGER = LogManager.getLogger(PaymentServiceImpl.class);
+    private HttpClient client = HttpClient.getInstance();
 
     @Override
     public NotificationResponse parse(NotificationRequest request) {
@@ -33,10 +36,20 @@ public class NotificationServiceImpl implements NotificationService {
             // init data
             String content = PluginUtils.inputStreamToString(request.getContent());
             com.payline.payment.cvconnect.bean.response.PaymentResponse notificationPaymentResponse = com.payline.payment.cvconnect.bean.response.PaymentResponse.fromJson(content);
-            Transaction transaction = notificationPaymentResponse.getTransaction();
-            partnerTransactionId = transaction.getId();
+            partnerTransactionId = notificationPaymentResponse.getTransaction().getId();
+
+            RequestConfiguration configuration = new RequestConfiguration(
+                    request.getContractConfiguration()
+                    , request.getEnvironment()
+                    , request.getPartnerConfiguration());
+
+            // get final status
+            GetTransactionStatusRequest getTransactionStatusRequest = new GetTransactionStatusRequest(partnerTransactionId);
+            com.payline.payment.cvconnect.bean.response.PaymentResponse response = client.getTransactionStatus(configuration, getTransactionStatusRequest);
+            Transaction transaction = response.getTransaction();
 
             switch (transaction.getState()) {
+
                 case VALIDATED:
                     // PaymentResponseByNotificationResponse => Success
                     PaymentResponse paymentResponse = PaymentResponseSuccess.PaymentResponseSuccessBuilder
