@@ -1,11 +1,8 @@
 package com.payline.payment.cvconnect.service.impl;
 
 import com.payline.payment.cvconnect.bean.common.Transaction;
-import com.payline.payment.cvconnect.bean.configuration.RequestConfiguration;
-import com.payline.payment.cvconnect.bean.request.GetTransactionStatusRequest;
 import com.payline.payment.cvconnect.exception.PluginException;
 import com.payline.payment.cvconnect.utils.PluginUtils;
-import com.payline.payment.cvconnect.utils.http.HttpClient;
 import com.payline.pmapi.bean.common.*;
 import com.payline.pmapi.bean.notification.request.NotificationRequest;
 import com.payline.pmapi.bean.notification.response.NotificationResponse;
