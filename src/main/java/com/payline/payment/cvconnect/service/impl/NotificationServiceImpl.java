@@ -26,7 +26,6 @@ import java.util.Date;
 
 public class NotificationServiceImpl implements NotificationService {
     private static final Logger LOGGER = LogManager.getLogger(PaymentServiceImpl.class);
-    private HttpClient client = HttpClient.getInstance();
 
     @Override
     public NotificationResponse parse(NotificationRequest request) {
@@ -39,9 +38,16 @@ public class NotificationServiceImpl implements NotificationService {
             Transaction transaction = notificationPaymentResponse.getTransaction();
             partnerTransactionId = transaction.getId();
 
-            switch (transaction.getState()) {
+            String transactionId = transaction.getOrder().getId();
 
-                case VALIDATED:
+            TransactionCorrelationId correlationId = TransactionCorrelationId.TransactionCorrelationIdBuilder
+                    .aCorrelationIdBuilder()
+                    .withType(TransactionCorrelationId.CorrelationIdType.TRANSACTION_ID)
+                    .withValue(transactionId)
+                    .build();
+
+            switch (transaction.getState()) {
+                case AUTHORIZED:
                     // PaymentResponseByNotificationResponse => Success
                     Amount reservedAmount = new Amount(
                             transaction.getPayer().getFirstAuthorization().getAmount().getTotal()
@@ -84,8 +90,12 @@ public class NotificationServiceImpl implements NotificationService {
                     break;
 
                 // TransactionStateChangedResponse
+                case VALIDATED:
+                    TransactionStatus paylineStatus = SuccessTransactionStatus.builder().build();
+                    notificationResponse = createTransactionStateChanged(transactionId, partnerTransactionId, paylineStatus);
+                    break;
                 case CONSIGNED:
-                    TransactionStatus paylineStatus = OnHoldTransactionStatus.builder().onHoldCause(OnHoldCause.ASYNC_RETRY).build();
+                    paylineStatus = OnHoldTransactionStatus.builder().onHoldCause(OnHoldCause.ASYNC_RETRY).build();
                     notificationResponse = createTransactionStateChanged(transactionId, partnerTransactionId, paylineStatus);
                     break;
                 case REJECTED:
@@ -99,7 +109,6 @@ public class NotificationServiceImpl implements NotificationService {
                     break;
                 case INITIALIZED:
                 case PROCESSING:
-                case AUTHORIZED:
                 default:
                     notificationResponse = new IgnoreNotificationResponse();
                     break;
