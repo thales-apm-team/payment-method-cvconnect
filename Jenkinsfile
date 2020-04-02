@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     options {
-      gitLabConnection('GitlabConnection')
-      gitlabBuilds(builds: ["Assemble", "Test"])
-      disableConcurrentBuilds()
-      buildDiscarder(logRotator(numToKeepStr:'10'))
+        gitLabConnection('GitlabConnection')
+        gitlabBuilds(builds: ["Assemble", "Test"])
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr:'10'))
     }
     environment {
         versionInGradle = sh(script: './gradlew -q printVersion', returnStdout: true).trim()
@@ -40,9 +40,9 @@ pipeline {
             }
             post {
                 always {
-		  catchError {
-                    junit '**/build/test-results/**/*.xml'
-		  }
+                    catchError {
+                        junit '**/build/test-results/**/*.xml'
+                    }
                 }
                 failure {
                     updateGitlabCommitStatus name: 'Test', state: 'failed'
@@ -58,7 +58,7 @@ pipeline {
                 sh './gradlew dependencyCheckAnalyze --info'
                 dependencyCheckPublisher canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/build/reports/dependency-check-report.xml', unHealthy: ''
             }
-         }
+        }
         stage ('Publication & Sonar') {
             parallel {
                 stage('Publication sur Nexus') {
@@ -81,19 +81,16 @@ pipeline {
                     }
                 }
                 stage('SonarQube') {
-                  //  when { not { branch 'master' } }
+                    //  when { not { branch 'master' } }
                     steps {
                         withSonarQubeEnv('SonarMonext') {
                             script {
-				if (BRANCH_NAME == 'master') {
-                                    sh './gradlew sonarqube --info --stacktrace'
-                              	}
-                                if (BRANCH_NAME == 'develop') {
-                                   sh './gradlew sonarqube -Dsonar.branch.name=develop -Dsonar.branch.target=master  --info --stacktrace'
-				}	
-				if (BRANCH_NAME != 'master' &&  BRANCH_NAME != 'develop') {
-                                   sh './gradlew sonarqube  -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.branch.target=develop --info --stacktrace'
-                                }				   				    
+                                if (BRANCH_NAME == 'develop' || BRANCH_NAME == 'master') {
+                                    sh './gradlew sonarqube -Dsonar.branch.name=${BRANCH_NAME}  --info --stacktrace'
+                                }
+                                if (BRANCH_NAME != 'master' &&  BRANCH_NAME != 'develop') {
+                                    sh './gradlew sonarqube  -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.branch.target=develop --info --stacktrace'
+                                }
                             }
                         }
                     }
@@ -105,14 +102,14 @@ pipeline {
                 }
             }
         }
-        //stage ('Tag Git') {
-          // when {
-          //      anyOf { branch 'master'; branch 'develop'; branch "release/*" }
-           // }
-           // steps {
-           //     sh "git tag -f V${versionInGradle}"
-           //     sh "git push origin -f V${versionInGradle}"
-           // }
-        //}
+        stage ('Tag Git') {
+            when {
+                anyOf { branch 'master'; branch 'develop'; branch "release/*" }
+            }
+            steps {
+                sh "git tag -f V${versionInGradle}"
+                sh "git push origin -f V${versionInGradle}"
+            }
+        }
     }
 }
