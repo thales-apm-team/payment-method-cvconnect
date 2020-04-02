@@ -103,14 +103,15 @@ pipeline {
                 }
             }
         }
-        stage ('Tag Git') {
-            when {
-                anyOf { branch 'master'; branch 'develop'; branch "release/*" }
-            }
-            steps {
-                sh "git tag -f V${versionInGradle}"
-                sh "git push origin -f V${versionInGradle}"
-            }
-        }
+        // Not possible from our jenkins
+        // stage ('Tag Git') {
+        //     when {
+        //         anyOf { branch 'master'; branch 'develop'; branch "release/*" }
+        //     }
+        //     steps {
+        //         sh "git tag -f V${versionInGradle}"
+        //         sh "git push origin -f V${versionInGradle}"
+        //     }
+        // }
     }
 }
