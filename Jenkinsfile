@@ -86,14 +86,13 @@ pipeline {
                     steps {
                         withSonarQubeEnv('SonarMonext') {
                             script {
-                                sh './gradlew sonarqube -Dsonar.branch.name=${BRANCH_NAME} --info --stacktrace'
-
-//                                if (BRANCH_NAME == 'develop') {
+                                if (BRANCH_NAME == 'develop') {
+                                    sh './gradlew sonarqube --info --stacktrace'
 //                                    sh './gradlew sonarqube -Dsonar.branch.name=${BRANCH_NAME} --info --stacktrace'
-//                                }
-//                                if (BRANCH_NAME != 'develop') {
-//                                    sh './gradlew sonarqube  -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.branch.target=develop --info --stacktrace'
-//                                }
+                                }
+                                if (BRANCH_NAME != 'develop') {
+                                    sh './gradlew sonarqube  -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.branch.target=develop --info --stacktrace'
+                                }
                             }
                         }
                     }
